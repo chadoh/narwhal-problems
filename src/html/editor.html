@@ -1,0 +1,93 @@
+<div id="edit-area">
+  <button id="edit">
+    <small>edit accounts <span class="arrow">▾</span></small>
+  </button>
+  <div class="hidden">
+    <p>
+      Edit this data, add your own accounts! Your list will only be saved in
+      your current browser; nowhere surveillable, nowhere permanent.
+    </p>
+    <textarea></textarea>
+    <button id="save">Save</button>
+  </div>
+</div>
+
+<style>
+  .arrow {
+    font-family: monospace;
+    display: inline-block;
+    font-size: 1.2em;
+    transition: transform 200ms;
+  }
+
+  .active .arrow {
+    transform: rotateZ(-90deg);
+  }
+
+  .hidden {
+    display: flex;
+    flex-direction: column;
+    height: 0;
+    overflow: hidden;
+    transition: height 200ms;
+  }
+
+  .active .hidden {
+    min-height: 18em;
+    height: 100vh;
+  }
+
+  textarea {
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    flex: 1;
+    margin-bottom: 1em;
+    padding: 0.5em;
+  }
+</style>
+
+<script>
+  const exampleAccountData = `[
+  {
+    wallet_location: "trust wallet", // enter any sort of text you want here; this is how YOU remember where this wallet is
+    account_name: 'lol.near', // if an implicit account, enter the implicit account name here (see next example)
+    starting_balance: 1000,
+    lockup_contract: 'lololol.lockup.near'
+  },
+  {
+    wallet_location: "ledger 44'/397'/0'/0'/1'",
+    public_key: 'ed25519:lolomgwut', // public_key is optional
+    account_name: '0123456789abcdef',
+    starting_balance: 100000,
+    lockup_contract: 'deadbeef0987654321.lockup.near',
+    delegated_to: 'zkv_staketosupportprivacy.poolv1.near' // delegated_to is optional
+  },
+]`
+
+  /**
+   * Render account data editor. Should only be called once! Attaches handlers.
+   */
+  window.renderers.push(async function renderEditor() {
+    if (window.state.editorRendered) return
+
+    const textarea = document.querySelector('textarea')
+    const saveButton = document.querySelector('#save')
+    const editButton = document.querySelector('#edit')
+    const editArea = document.querySelector('#edit-area')
+    if (editButton && editArea && textarea && saveButton) {
+      editButton.addEventListener('click', () => {
+        const editing = editArea.className === 'active'
+        editArea.className = editing ? '' : 'active'
+        if (!editing) textarea.focus()
+      })
+
+      textarea.value = (await window.accounts.getRaw()) || exampleAccountData
+      saveButton.addEventListener('click', () => {
+        window.accounts.set(textarea.value)
+      })
+    }
+
+    window.state.editorRendered = true
+  })
+</script>

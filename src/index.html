@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🐳 Narwhal Problems 💰</title>
+  <link rel="preconnect" href="https://rsms.me">
+  <link href="https://rsms.me/inter/inter.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/index.css">
+  <!-- <link rel="icon" href="favicon.png" type="image/png" /> -->
+  <meta property="og:title" content="Microsite">
+  <meta property="og:description" content="A microsite about something">
+  <!-- <meta property="og:image" content=""> -->
+  <!-- <meta property="og:url" content="https://example.com/"> -->
+  <!-- <meta name="twitter:card" content="summary_large_image"> -->
+  <script>
+    // add functions to array of renderers and they'll all be called in parallel
+    // with `window.render()` (see render.ts)
+    window.renderers = []
+
+    // you can add things you need to `window.state`
+    // (to only render something once, for example)
+    window.state = {}
+  </script>
+  <script src="js/index.ts"></script>
+</head>
+
+<body>
+  <h1>🐳 Narwhal Problems 💰</h1>
+  <include src="intro.html"></include>
+  <include src="accounts.html"></include>
+  <include src="editor.html"></include>
+  <script>
+    window.render()
+  </script>
+</body>
+
+</html>

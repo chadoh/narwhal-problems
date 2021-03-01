@@ -1,0 +1,138 @@
+<div id="accounts"></div>
+
+<style>
+  @media (min-width: 900px) {
+    #accounts {
+      display: grid;
+      grid-column-gap: 1em;
+      grid-template-columns: repeat(auto-fill, minmax(440px, 1fr));
+    }
+  }
+
+  #accounts h2 {
+    margin: 0;
+  }
+
+  #accounts h2 small {
+    color: var(--gray);
+    display: block;
+  }
+
+  #accounts h2 strong {
+    display: block;
+  }
+
+  @media (min-width: 460px) {
+    #accounts h2 {
+      align-items: end;
+      display: grid;
+      grid-template-columns: auto auto;
+      grid-gap: 0.5em;
+    }
+  }
+
+  #accounts>* {
+    border: 1px solid var(--gray);
+    border-radius: 0.5em;
+    padding: 1em;
+    overflow: hidden;
+    max-width: 100%;
+    margin-bottom: 1em;
+  }
+
+  #accounts>*>*:last-child {
+    margin-bottom: 0;
+  }
+</style>
+
+<script>
+  const near = new window.naj.Near({
+    keyStore: new window.naj.keyStores.InMemoryKeyStore(),
+    // @ts-expect-error
+    networkId: process.env.NETWORK_ID,
+    // @ts-expect-error
+    nodeUrl: process.env.NODE_URL,
+  })
+
+  async function checkBalance(poolId, lockupId) {
+    // near-api-js requires instantiating an "account" object, but this is NOT
+    // used to sign view functions, and so the lockupId passed in doesn't
+    // matter. Passing poolId to be doubly sure that no lockupIds get
+    // de-anonymized.
+    const account = await near.account(poolId)
+    return await account.viewFunction(
+      poolId,
+      'get_account_total_balance',
+      { account_id: lockupId }
+    )
+  }
+
+  const link = (account) => `
+  <a
+    class="ellipsis"
+    href="${process.env.EXPLORER_URL}/accounts/${account}"
+    target="_blank"
+  >
+    ${account}
+  </a>
+`
+
+  const formatLargeNum = (n) =>
+    new Intl.NumberFormat(undefined).format(n)
+
+  window.renderers.push(async function renderAccounts() {
+    const container = document.querySelector('#accounts')
+    if (!container) return
+
+    const accounts = await window.accounts.get()
+    if (!accounts) return
+
+    const accountsHtml = await Promise.all(accounts.map(
+      async ({
+        wallet_location,
+        public_key, // possibly undefined
+        account_name,
+        starting_balance,
+        lockup_contract,
+        delegated_to // possibly undefined
+      }) => {
+        return `<div>
+        <header>
+          <h2>
+            <span>${wallet_location}</span>
+            ${!public_key ? '' : `
+              <small
+                class="ellipsis"
+                title="public key: ${public_key}"
+              >
+                ${public_key.replace(/^ed25519:/, '')}
+              </small>
+            `}
+          </h2>
+          ${link(account_name)}
+        </header>
+        <p>
+          <strong>Starting Balance</strong>
+          ${formatLargeNum(starting_balance)}
+        </p>
+        ${!delegated_to ? '' : `
+          <p>
+            <strong>Current Balance</strong>
+            ${formatLargeNum((await checkBalance(delegated_to, lockup_contract)) / 10 ** 24)}
+          </p>
+        `}
+        <p>
+          <strong>Lockup Contract</strong>
+          ${link(lockup_contract)}
+        </p>
+        ${!delegated_to ? '' : `<p>
+          <strong>Delegated to</strong>
+          ${link(delegated_to)}
+        </p>`}
+      </div>`
+      }
+    ))
+
+    container.innerHTML = accountsHtml.join('')
+  })
+</script>
