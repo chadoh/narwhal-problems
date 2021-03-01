@@ -2,7 +2,6 @@
   "name": "narwhal-probs",
   "version": "1.0.0",
   "description": "A dashboard for NEAR Whales (Narwhals!)",
-  "main": "false",
   "license": "MIT",
   "private": true,
   "scripts": {
