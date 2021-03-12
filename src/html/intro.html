@@ -48,10 +48,10 @@
 
 <script>
   window.renderers.push(async function renderIntro() {
-    if (window.accounts.get()) {
-      document.querySelector('#intro').display = 'none'
+    if (await window.accounts.get()) {
+      document.querySelector('#intro').style.display = 'none'
     } else {
-      document.querySelector('#intro').display = 'block'
+      document.querySelector('#intro').style.display = 'block'
     }
   })
 </script>
