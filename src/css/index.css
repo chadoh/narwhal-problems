@@ -10,12 +10,13 @@
   --orange: #ffb259;
   --yellow: #f0ec74;
   --green: #00c08b;
-  --blue: #0072ce;
+  --blue: #00c1de;
+  --royal: #0072ce;
   --purple: #627eea;
 
   --bg: var(--white);
   --fg: var(--black);
-  --primary: var(--blue);
+  --primary: var(--royal);
   --secondary: var(--green);
   --tertiary: var(--orange);
 }
@@ -24,7 +25,7 @@
     --bg: var(--black);
     --fg: var(--white);
     --gray: #444;
-    --blue: #00c1de;
+    --primary: var(--blue);
   }
 }
 
@@ -45,49 +46,49 @@ body {
 }
 
 a,
-button.link {
+.link {
   color: var(--primary);
   text-decoration: none;
+  padding: 0;
+  border-bottom: 1px solid var(--bg);
 }
 a:hover,
 a:focus,
-button.link:hover,
-button.link:focus {
-  color: var(--primary);
-  text-decoration: underline;
+.link:hover,
+.link:focus {
+  border-bottom: 1px solid var(--primary);
 }
 a:active,
-button.link:active {
-  color: var(--tertiary);
-  text-decoration: underline;
+.link:active {
+  color: var(--secondary);
 }
 
 button {
-  background: transparent;
-  border-radius: 5px;
-  border: 0.25em solid var(--primary);
-  color: inherit;
-  cursor: pointer;
   font: inherit;
-  padding: 0.5em 1em;
-  position: relative;
-  transition: top 50ms;
+  outline: none;
 }
-button:hover,
-button:focus {
-  border-color: var(--secondary);
-  top: -1px;
+
+button {
+  background-color: var(--fg);
+  border-radius: 0.5em;
+  border: none;
+  color: var(--bg);
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.3em 0.75em;
+  transition: transform 30ms;
+}
+button:hover, button:focus {
+  box-shadow: 0 0 10em rgba(255, 255, 255, 0.2) inset;
 }
 button:active {
-  background: var(--tertiary);
-  border-color: var(--tertiary);
-  top: 3px;
+  box-shadow: 0 0 10em rgba(0, 0, 0, 0.1) inset;
 }
 button.link {
-  border: none;
-  color: var(--primary);
-  margin: 0;
-  padding: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  display: inline;
 }
 
 .ellipsis {

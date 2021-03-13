@@ -1,6 +1,6 @@
 <div id="edit-area">
   <button id="edit">
-    <small>edit accounts <span class="arrow">▾</span></small>
+    edit accounts
   </button>
   <div class="hidden">
     <p>
@@ -8,23 +8,23 @@
       your current browser; nowhere surveillable, nowhere permanent.
     </p>
     <textarea></textarea>
-    <button id="save">Save</button>
   </div>
 </div>
 
 <style>
-  .arrow {
+  #edit-area #edit {
+    display: block;
+    margin: 2em auto 1em;
+  }
+
+  #edit-area .arrow {
     font-family: monospace;
     display: inline-block;
     font-size: 1.2em;
     transition: transform 200ms;
   }
 
-  .active .arrow {
-    transform: rotateZ(-90deg);
-  }
-
-  .hidden {
+  #edit-area .hidden {
     display: flex;
     flex-direction: column;
     height: 0;
@@ -32,18 +32,20 @@
     transition: height 200ms;
   }
 
-  .active .hidden {
-    min-height: 18em;
-    height: 100vh;
-  }
-
-  textarea {
+  #edit-area textarea {
     background: transparent;
     color: inherit;
     font: inherit;
     flex: 1;
-    margin-bottom: 1em;
     padding: 0.5em;
+  }
+
+  #edit-area.active .hidden {
+    min-height: 18em;
+    height: 80vh;
+  }
+  #edit-area.active .arrow {
+    transform: rotateZ(-90deg);
   }
 </style>
 
@@ -71,10 +73,9 @@
     if (window.state.editorRendered) return
 
     const textarea = document.querySelector('textarea')
-    const saveButton = document.querySelector('#save')
     const editButton = document.querySelector('#edit')
     const editArea = document.querySelector('#edit-area')
-    if (editButton && editArea && textarea && saveButton) {
+    if (editButton && editArea && textarea) {
       editButton.addEventListener('click', () => {
         const editing = editArea.className === 'active'
         editArea.className = editing ? '' : 'active'
@@ -82,7 +83,7 @@
       })
 
       textarea.value = (await accounts.getRaw()) || exampleAccountData
-      saveButton.addEventListener('click', () => {
+      textarea.addEventListener('keyup', () => {
         accounts.set(textarea.value)
       })
     }
