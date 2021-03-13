@@ -46,9 +46,11 @@
   </p>
 </div>
 
-<script>
+<script type="module">
+  import { get as getAccounts } from './js/accounts'
+
   window.renderers.push(async function renderIntro() {
-    if (await window.accounts.get()) {
+    if (await getAccounts()) {
       document.querySelector('#intro').style.display = 'none'
     } else {
       document.querySelector('#intro').style.display = 'block'
