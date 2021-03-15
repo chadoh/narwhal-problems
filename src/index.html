@@ -23,6 +23,7 @@
     // (to only render something once, for example)
     window.state = {}
   </script>
+  <script src="js/index.ts"></script>
 </head>
 
 <body>
@@ -30,7 +31,9 @@
   <include src="intro.html"></include>
   <include src="accounts.html"></include>
   <include src="editor.html"></include>
-  <script type="module" src="js/index.ts"></script>
+  <script>
+    window.render()
+  </script>
 </body>
 
 </html>

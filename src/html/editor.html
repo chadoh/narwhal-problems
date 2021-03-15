@@ -49,9 +49,7 @@
   }
 </style>
 
-<script type="module">
-  import * as accounts from './js/accounts'
-
+<script>
   const exampleAccountData = `[
   {
     wallet_location: "trust wallet", // enter any sort of text you want here; this is how YOU remember where this wallet is
@@ -69,6 +67,9 @@
   },
 ]`
 
+  /**
+   * Render account data editor. Should only be called once! Attaches handlers.
+   */
   window.renderers.push(async function renderEditor() {
     if (window.state.editorRendered) return
 
@@ -82,7 +83,7 @@
         if (!editing) textarea.focus()
       })
 
-      textarea.value = (await accounts.getRaw()) || exampleAccountData
+      textarea.value = (await window.accounts.getRaw()) || exampleAccountData
       textarea.addEventListener('keyup', () => {
         accounts.set(textarea.value)
       })

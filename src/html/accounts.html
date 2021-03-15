@@ -45,12 +45,9 @@
   }
 </style>
 
-<script type="module">
-  import { Near, keyStores } from 'near-api-js'
-  import { get as getAccounts } from './js/accounts'
-
-  const near = new Near({
-    keyStore: new keyStores.InMemoryKeyStore(),
+<script>
+  const near = new window.naj.Near({
+    keyStore: new window.naj.keyStores.InMemoryKeyStore(),
     // @ts-expect-error
     networkId: process.env.NETWORK_ID,
     // @ts-expect-error
@@ -87,7 +84,7 @@
     const container = document.querySelector('#accounts')
     if (!container) return
 
-    const accounts = await getAccounts()
+    const accounts = await window.accounts.get()
     if (!accounts) return
 
     const accountsHtml = await Promise.all(accounts.map(
