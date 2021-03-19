@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "build": "parcel build src/index.html --public-url ./",
-    "start": "parcel serve src/index.html"
+    "start": "parcel serve -p 1337 src/index.html"
   },
   "devDependencies": {
     "@babel/core": "^7.13.8",
