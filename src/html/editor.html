@@ -85,7 +85,9 @@
 
       textarea.value = (await window.accounts.getRaw()) || exampleAccountData
       textarea.addEventListener('keyup', () => {
-        accounts.set(textarea.value)
+        if (textarea.value !== exampleAccountData) {
+          accounts.set(textarea.value)
+        }
       })
     }
 
