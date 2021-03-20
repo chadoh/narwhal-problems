@@ -47,8 +47,8 @@
 </div>
 
 <script>
-  window.renderers.push(async function renderIntro() {
-    if (await window.accounts.get()) {
+  window.renderers.push(async function renderIntro({ accounts }) {
+    if (accounts) {
       document.querySelector('#intro').style.display = 'none'
     } else {
       document.querySelector('#intro').style.display = 'block'

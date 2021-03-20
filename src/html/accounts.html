@@ -46,46 +46,21 @@
 </style>
 
 <script>
-  const near = new window.naj.Near({
-    keyStore: new window.naj.keyStores.InMemoryKeyStore(),
-    // @ts-expect-error
-    networkId: process.env.NETWORK_ID,
-    // @ts-expect-error
-    nodeUrl: process.env.NODE_URL,
-  })
-
-  async function checkBalance(poolId, lockupId) {
-    // near-api-js requires instantiating an "account" object, but this is NOT
-    // used to sign view functions, and so the lockupId passed in doesn't
-    // matter. Passing poolId to be doubly sure that no lockupIds get
-    // de-anonymized.
-    const account = await near.account(poolId)
-    return await account.viewFunction(
-      poolId,
-      'get_account_total_balance',
-      { account_id: lockupId }
-    )
-  }
-
   const link = (account) => `
-  <a
-    class="ellipsis"
-    href="${process.env.EXPLORER_URL}/accounts/${account}"
-    target="_blank"
-  >
-    ${account}
-  </a>
-`
+    <a
+      class="ellipsis"
+      href="${process.env.EXPLORER_URL}/accounts/${account}"
+      target="_blank"
+    >
+      ${account}
+    </a>
+  `
 
-  const formatLargeNum = (n) =>
-    new Intl.NumberFormat(undefined).format(n)
+  window.renderers.push(async function renderAccounts({ accounts }) {
+    if (!accounts) return
 
-  window.renderers.push(async function renderAccounts() {
     const container = document.querySelector('#accounts')
     if (!container) return
-
-    const accounts = await window.accounts.get()
-    if (!accounts) return
 
     const accountsHtml = await Promise.all(accounts.map(
       async ({
@@ -93,6 +68,7 @@
         public_key, // possibly undefined
         account_name,
         starting_balance,
+        current_balance,
         lockup_contract,
         delegated_to // possibly undefined
       }) => {
@@ -113,12 +89,12 @@
         </header>
         <p>
           <strong>Starting Balance</strong>
-          ${formatLargeNum(starting_balance)}
+          ${window.utils.formatLargeNum(starting_balance)}
         </p>
         ${!delegated_to ? '' : `
           <p>
             <strong>Current Balance</strong>
-            ${formatLargeNum((await checkBalance(delegated_to, lockup_contract)) / 10 ** 24)}
+            ${window.utils.formatLargeNum(current_balance)}
           </p>
         `}
         <p>

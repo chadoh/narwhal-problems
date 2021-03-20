@@ -1,13 +1,11 @@
-import * as accounts from './accounts'
-import * as naj from 'near-api-js'
 import render from './render'
+import * as utils from './utils'
 
 declare global {
   interface Window {
-    accounts: accounts;
-    naj: naj;
     render: render;
-    renderers: (() => {})[]
-    state: { [key: string]: any }
+    renderers: (() => {})[];
+    state: { [key: string]: any };
+    utils: utils;
   }
 }

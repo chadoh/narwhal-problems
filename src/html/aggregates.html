@@ -1,0 +1,18 @@
+<div id="aggregates"></div>
+
+<script>
+  window.renderers.push(async function renderAccounts({ accounts }) {
+    if (!accounts) return
+
+    const container = document.querySelector('#aggregates')
+    if (!container) return
+
+    const totalEarnings = accounts.reduce(
+      (sum, account) =>
+        sum + account.current_balance - account.starting_balance,
+      0
+    )
+
+    container.innerHTML = `<p>Total Earnings: ${window.utils.formatLargeNum(totalEarnings)}</p>`
+  })
+</script>

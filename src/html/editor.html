@@ -70,7 +70,7 @@
   /**
    * Render account data editor. Should only be called once! Attaches handlers.
    */
-  window.renderers.push(async function renderEditor() {
+  window.renderers.push(async function renderEditor({ accountsRaw, setAccounts }) {
     if (window.state.editorRendered) return
 
     const textarea = document.querySelector('textarea')
@@ -83,10 +83,10 @@
         if (!editing) textarea.focus()
       })
 
-      textarea.value = (await window.accounts.getRaw()) || exampleAccountData
+      textarea.value = accountsRaw || exampleAccountData
       textarea.addEventListener('keyup', () => {
         if (textarea.value !== exampleAccountData) {
-          accounts.set(textarea.value)
+          setAccounts(textarea.value)
         }
       })
     }
