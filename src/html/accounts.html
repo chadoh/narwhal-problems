@@ -70,7 +70,8 @@
         starting_balance,
         current_balance,
         lockup_contract,
-        delegated_to // possibly undefined
+        delegated_to, // possibly undefined
+        ...extra
       }) => {
         return `<div>
         <header>
@@ -105,6 +106,9 @@
           <strong>Delegated to</strong>
           ${link(delegated_to)}
         </p>`}
+        ${Object.entries(extra).map(([key, value]) => `<p>
+          <strong>${key}</strong> ${value}
+        </p>`).join('')}
       </div>`
       }
     ))
