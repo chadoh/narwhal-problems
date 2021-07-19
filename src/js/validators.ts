@@ -3,6 +3,8 @@ import {
 } from 'near-api-js'
 import near from './near'
 
+export type ValidatorStatus = 'active' | 'next' | 'proposed' | 'inactive'
+
 interface Cache {
   current: { [key: string]: CurrentEpochValidatorInfo; };
   next: { [key: string]: NextEpochValidatorInfo; };
@@ -43,7 +45,7 @@ async function fetchValidators(): Promise<Cache> {
   return cache
 }
 
-export async function getStatus(validator: string): Promise<'active'|'next'|'proposed'|'inactive'> {
+export async function getStatus(validator: string): Promise<ValidatorStatus> {
   const validators = await fetchValidators()
   if (validators.current[validator]) return 'active'
   if (validators.next[validator]) return 'next'

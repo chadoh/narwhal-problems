@@ -1,5 +1,6 @@
 import parse from 'loose-json'
 import near from './near'
+import { getStatus, ValidatorStatus } from './validators'
 
 interface Account {
   wallet_location: string;
@@ -9,6 +10,7 @@ interface Account {
   current_balance?: number;
   lockup_contract: string;
   delegated_to?: string;
+  validator_status?: ValidatorStatus
 }
 
 interface AccountsCache {
@@ -63,9 +65,10 @@ export async function get(): Promise<null | Account[]> {
   accountsCache.parsed = await Promise.all(parse(raw).map(
     async (account: Account) => ({
       ...account,
-      current_balance: account.delegated_to
-        ? await checkBalance(account.delegated_to, account.lockup_contract)
-        : undefined
+      current_balance: account.delegated_to &&
+        await checkBalance(account.delegated_to, account.lockup_contract),
+      validator_status: account.delegated_to &&
+        await getStatus(account.delegated_to)
     })
   ))
 

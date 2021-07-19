@@ -14,8 +14,8 @@
 
   .account.undelegated {
     --color--account-header: var(--blue-300);
-    --color--account-amount: var(--blue-800);
-    --color--account-status: var(--blue-700);
+    --color--account-location: var(--blue-800);
+    --color--account-validator-status: var(--blue-700);
     --color--account-body: var(--blue-100);
     --color--account-actions--cta: var(--blue-500);
     --color--account-actions--delete: var(--blue-200);
@@ -28,8 +28,8 @@
   }
   .account.validator-active {
     --color--account-header: var(--green-300);
-    --color--account-amount: var(--green-800);
-    --color--account-status: var(--green-700);
+    --color--account-location: var(--green-800);
+    --color--account-validator-status: var(--green-700);
     --color--account-body: var(--green-100);
     --color--account-actions--cta: var(--green-600);
     --color--account-actions--delete: var(--green-200);
@@ -43,8 +43,8 @@
   .account.validator-next,
   .account.validator-proposed {
     --color--account-header: var(--orange-300);
-    --color--account-amount: var(--orange-800);
-    --color--account-status: var(--orange-700);
+    --color--account-location: var(--orange-800);
+    --color--account-validator-status: var(--orange-700);
     --color--account-body: var(--orange-100);
     --color--account-actions--cta: var(--orange-600);
     --color--account-actions--delete: var(--orange-200);
@@ -57,8 +57,8 @@
   }
   .account.validator-inactive {
     --color--account-header: var(--red-300);
-    --color--account-amount: var(--red-800);
-    --color--account-status: var(--red-700);
+    --color--account-location: var(--red-800);
+    --color--account-validator-status: var(--red-700);
     --color--account-body: var(--red-100);
     --color--account-actions--cta: var(--red-600);
     --color--account-actions--delete: var(--red-200);
@@ -92,7 +92,42 @@
   }
 
   h2.account__location {
-    margin: 0;
+    color: var(--color--account-location);
+    font-size: var(--fs-heading-4);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .account__validator-status {
+    color: var(--color--account-validator-status);
+    display: flex;
+    align-items: center;
+    font-size: var(--fs-micro);
+  }
+
+  .account__validator-status .icon {
+    margin-right: var(--spacing-xs);
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: var(--spacing-m);
+    height: var(--spacing-m);
+  }
+
+  .account.validator-active > header .account__validator-status .icon {
+    background-image: url(img/wallet.svg);
+  }
+
+  .account.validator-proposed > header .account__validator-status .icon,
+  .account.validator-next > header .account__validator-status .icon {
+    background-image: url(img/alert-triangle.svg);
+  }
+
+  .account.validator-inactive > header .account__validator-status .icon {
+    background-image: url(img/alert-circle.svg);
+  }
+
+  .account.undelegated > header .account__validator-status .icon:before {
+    content: "→";
   }
 
   .account__datum {
@@ -207,10 +242,17 @@
     </a>
   `
 
-  async function validatorStatus(validator) {
-    if (!validator) return 'undelegated'
-    return `validator-${await window.validators.getStatus(validator)}`
-  }
+  function displayValidatorStatus (status, earnings) {
+    if (!status)
+      return 'earn $NEAR, secure the network; <a target="_blank" href="https://docs.near.org/docs/validator/delegation">delegate</a>'
+    if (status === 'active')
+      return `${window.utils.formatLargeNum(earnings)} $NEAR earned so far`
+    if (status === 'next')
+      return 'validator <a target="_blank" href="https://explorer.near.org/nodes/validators">inactive</a>; active next epoch'
+    if (status === 'proposed')
+      return 'validator inactive; <a target="_blank" href="https://explorer.near.org/nodes/proposals">back soon?</a>'
+    return 'validator inactive; <a target="_blank" href="https://docs.near.org/docs/validator/delegation">pick a new one</a>'
+}
 
   window.renderers.push(async function renderAccounts({ accounts }) {
     if (!accounts) return
@@ -219,7 +261,7 @@
     if (!container) return
 
     const accountsHtml = await Promise.all(accounts.map(
-      async ({
+      ({
         wallet_location,
         public_key, // possibly undefined
         account_name,
@@ -227,14 +269,26 @@
         current_balance,
         lockup_contract,
         delegated_to, // possibly undefined
+        validator_status, // possibly undefined
         ...extra
       }) => (`
         <div
-           class="account ${await validatorStatus(delegated_to)}"
+           class="account ${!delegated_to
+             ? 'undelegated'
+             : `validator-${validator_status}`
+           }"
            id=${account_name}
         >
           <header class="account__header">
-            <h2 class="account__location">${wallet_location}</h2>
+            <div>
+              <h2 class="account__location">${wallet_location}</h2>
+              <div class="account__validator-status">
+                <span class="icon"></span>
+                <span>${
+                  displayValidatorStatus(validator_status, current_balance - starting_balance)
+                }</span>
+              </div>
+            </div>
           </header>
           <div class="account__body">
             ${!public_key ? '' : `
