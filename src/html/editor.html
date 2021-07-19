@@ -1,4 +1,4 @@
-<div id="edit-area">
+<div id="edit-area" class="container">
   <button id="edit">
     edit accounts
   </button>
@@ -80,9 +80,10 @@
     const editArea = document.querySelector('#edit-area')
     if (editButton && editArea && textarea) {
       editButton.addEventListener('click', () => {
-        const editing = editArea.className === 'active'
-        editArea.className = editing ? '' : 'active'
-        if (!editing) textarea.focus()
+        editArea.classList.toggle('active')
+        if (editArea.classList.contains('active')) {
+          textarea.focus()
+        }
       })
 
       textarea.value = accountsRaw || exampleAccountData

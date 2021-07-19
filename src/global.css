@@ -111,7 +111,6 @@ html {
 
 body {
   margin: var(--spacing-xxl) auto;
-  max-width: 500px;
 }
 
 .content-wrapper {
@@ -257,4 +256,11 @@ button[disabled] {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.container {
+  margin: 0 auto;
+  padding: var(--spacing-m);
+  width: 100%;
+  max-width: 600px;
 }
