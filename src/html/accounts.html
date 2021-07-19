@@ -72,9 +72,19 @@
 
   .account {
     background-color: var(--color--account-body);
+    color: var(--color--accounts-label);
     font-size: var(--fs-small);
     overflow: hidden;
     margin-bottom: var(--input-height--small);
+  }
+
+  .account a {
+    color: inherit;
+    text-decoration: underline;
+  }
+  .account a:focus,
+  .account a:hover {
+    color: var(--color--footer-text);
   }
 
   @media (min-width: 600px) {
