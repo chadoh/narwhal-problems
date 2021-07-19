@@ -1,5 +1,5 @@
 import parse from 'loose-json'
-import { Near, keyStores } from 'near-api-js'
+import near from './near'
 
 interface Account {
   wallet_location: string;
@@ -15,14 +15,6 @@ interface AccountsCache {
   raw?: string;
   parsed?: Account[];
 }
-
-const near = new Near({
-  keyStore: new keyStores.InMemoryKeyStore(),
-  // @ts-expect-error
-  networkId: process.env.NETWORK_ID,
-  // @ts-expect-error
-  nodeUrl: process.env.NODE_URL,
-})
 
 const balancesCache: { [key: string]: number } = {}
 

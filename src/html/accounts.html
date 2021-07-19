@@ -26,7 +26,7 @@
     --color--footer-text: var(--blue-500);
     --color--footer-caret: var(--blue-500);
   }
-  .account.validator-online {
+  .account.validator-active {
     --color--account-header: var(--green-300);
     --color--account-amount: var(--green-800);
     --color--account-status: var(--green-700);
@@ -40,7 +40,8 @@
     --color--footer-text: var(--green-600);
     --color--footer-caret: var(--green-500);
   }
-  .account.warning {
+  .account.validator-next,
+  .account.validator-proposed {
     --color--account-header: var(--orange-300);
     --color--account-amount: var(--orange-800);
     --color--account-status: var(--orange-700);
@@ -54,7 +55,7 @@
     --color--footer-text: var(--orange-700);
     --color--footer-caret: var(--orange-500);
   }
-  .account.validator-offline {
+  .account.validator-inactive {
     --color--account-header: var(--red-300);
     --color--account-amount: var(--red-800);
     --color--account-status: var(--red-700);
@@ -206,6 +207,11 @@
     </a>
   `
 
+  async function validatorStatus(validator) {
+    if (!validator) return 'undelegated'
+    return `validator-${await window.validators.getStatus(validator)}`
+  }
+
   window.renderers.push(async function renderAccounts({ accounts }) {
     if (!accounts) return
 
@@ -224,7 +230,7 @@
         ...extra
       }) => (`
         <div
-           class="account ${true && "undelegated FIXME"}"
+           class="account ${await validatorStatus(delegated_to)}"
            id=${account_name}
         >
           <header class="account__header">
