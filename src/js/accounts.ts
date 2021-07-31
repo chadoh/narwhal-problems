@@ -1,15 +1,19 @@
-import parse from 'loose-json'
 import near from './near'
 import { getStatus, ValidatorStatus } from './validators'
 
-interface Account {
+// accounts as they exist in local storage
+interface RawAccount {
   wallet_location: string;
   public_key?: string;
   account_name: string;
+  hd_path?: string;
   starting_balance: number;
-  current_balance?: number;
   lockup_contract: string;
   delegated_to?: string;
+};
+
+type Account = RawAccount & {
+  current_balance?: number;
   validator_status?: ValidatorStatus
 }
 
@@ -51,30 +55,31 @@ const accountsCache: AccountsCache = {}
 
 /**
  * Get all accounts
- * @returns an array of Account objects, or null
+ * @returns Accounts an array of Account objects, or null
  */
-export async function get(): Promise<null | Account[]> {
+export async function get(): Promise<Account[]> {
   const raw = localStorage.getItem('accounts')
-  if (!raw) return null
+  if (!raw) return []
 
   if (raw === accountsCache.raw) {
     return accountsCache.parsed as Account[]
   }
 
   accountsCache.raw = raw
-  accountsCache.parsed = await Promise.all(parse(raw).map(
-    async (account: Account) => ({
-      ...account,
-      current_balance: account.delegated_to &&
-        await checkBalance(account.delegated_to, account.lockup_contract),
-      validator_status: account.delegated_to &&
-        await getStatus(account.delegated_to)
-    })
+  accountsCache.parsed = await Promise.all((JSON.parse(raw) as RawAccount[]).map(
+    async (account: Account) => {
+      if (account.delegated_to) {
+        account.current_balance = await checkBalance(
+          account.delegated_to, account.lockup_contract
+        )
+        account.validator_status = await getStatus(account.delegated_to)
+      }
+      return account
+    }
   ))
 
-  return accountsCache.parsed as Account[]
+  return accountsCache.parsed
 }
-
 /**
  * Get raw account data as stored in localStorage.
  * This may have spaces and comments in it.
@@ -83,14 +88,15 @@ export async function getRaw(): Promise<null | string> {
   return localStorage.getItem('accounts')
 }
 
+
 /**
  * Set localStorage with new accounts and call on functions passed that have
  * been passed to onChange.
  *
- * @param newAccounts json blob of accounts. Can have whitespace
+ * @param newAccounts array of accounts
  */
-export async function set(newAccounts: string) {
-  localStorage.setItem('accounts', newAccounts);
+export async function set(newAccounts: RawAccount[]) {
+  localStorage.setItem('accounts', JSON.stringify(newAccounts));
   await Promise.all(onChangeFns.map(fn => fn()))
 }
 

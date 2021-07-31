@@ -163,23 +163,23 @@ strong {
 
 label {
   display: block;
-  font-size: var(--fs-micro);
-  color: var(--gray-500);
-  margin-bottom: var(--base-spacing);
 }
 
 button,
+.button,
 input,
 select {
   font: inherit;
   outline: none;
 }
 
-button {
+button,
+.button {
   background-color: var(--black);
   border-radius: var(--br-base);
   border: none;
   color: var(--white);
+  display: inline-block;
   font-weight: var(--fw-bold);
   height: var(--input-height);
   line-height: var(--input-height);
@@ -188,12 +188,14 @@ button {
   cursor: pointer;
 }
 
-button.button-variant--secondary {
+button.button-variant--secondary,
+.button.button-variant--secondary {
   background-color: var(--gray-200);
   color: var(--black);
 }
 
-button.button-size--small {
+button.button-size--small,
+.button.button-size--small {
   border-radius: var(--br-small);
   height: 40px;
   padding-left: var(--spacing-m);
@@ -202,40 +204,52 @@ button.button-size--small {
   font-size: var(--fs-micro);
 }
 
-button.full-width {
+button.full-width,
+.button.full-width {
   width: 100%;
 }
 
 button:hover,
-button:focus {
+.button:hover,
+button:focus,
+.button:focus {
   box-shadow: 0 0 10em rgba(255, 255, 255, 0.2) inset;
+  text-decoration: none;
 }
-button:active {
+button:active,
+.button:active {
   box-shadow: 0 0 10em rgba(0, 0, 0, 0.1) inset;
 }
-button.link {
+button.link,
+.button.link {
   background: none;
   box-shadow: none;
   display: inline;
 }
-button.cta {
+button.cta,
+.button.cta {
   border-radius: 0.5em;
   padding: 0.75em;
   width: 100%;
 }
-button.cancel {
+.cancel {
+  display: block;
   background: none;
   box-shadow: none;
   color: var(--red-500);
   padding: 0.75em;
   width: 100%;
+  text-align: center;
 }
 button.cancel:hover,
-button.cancel:focus {
+.button.cancel:hover,
+button.cancel:focus,
+.button.cancel:focus {
   text-decoration: underline;
 }
 [disabled] button,
-button[disabled] {
+button[disabled],
+.button[disabled] {
   box-shadow: none;
   background-color: var(--gray-300);
   color: var(--gray-500);
@@ -250,6 +264,48 @@ button[disabled] {
   box-shadow: none;
 }
 
+input,
+select {
+  background-color: var(--white);
+  border: 2px solid var(--gray-300);
+  border-radius: 0.5em;
+  color: var(--gray-700);
+  padding: 0 var(--spacing-m);
+  height: var(--input-height);
+  width: 100%;
+}
+
+input.error,
+select.error {
+  border-color: var(--red-500);
+}
+
+.errorMessage {
+  color: var(--red-600);
+  font-size: var(--fs-micro);
+  line-height: var(--lh-copy);
+  margin-top: var(--spacing-s);
+}
+input::selection {
+  background-color: var(--blue-400);
+  color: var(--white);
+}
+
+input:hover {
+  background-color: var(--gray-100);
+}
+
+input:focus,
+input:active {
+  color: var(--gray-700);
+  border-color: var(--blue-400);
+}
+
+.input .hint {
+  display: block;
+  font-size: var(--fs-micro);
+  margin-top: var(--spacing-xs);
+}
 
 .ellipsis {
   display: block;
@@ -263,4 +319,21 @@ button[disabled] {
   padding: var(--spacing-m);
   width: 100%;
   max-width: 600px;
+}
+
+.modal {
+  position: fixed;
+  top: 0; bottom: 0; right: 0; left: 0;
+  background-color: rgba(0,0,0,0.1);
+  backdrop-filter: blur(4px);
+  padding: var(--spacing-xl);
+  overflow-y: scroll;
+  z-index: 1;
+}
+.modal > * {
+  border-radius: var(--br-base);
+  margin: 0 auto;
+  max-width: 600px;
+  background: var(--white);
+  padding: var(--spacing-xl);
 }

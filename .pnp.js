@@ -48,7 +48,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@parcel/transformer-posthtml", "npm:2.0.0-nightly.612"],
             ["@types/babel__core", "npm:7.1.12"],
             ["@types/node", "npm:14.14.31"],
-            ["loose-json", "npm:1.1.2"],
             ["near-api-js", "npm:0.36.2"],
             ["parcel", "npm:2.0.0-nightly.610"],
             ["postcss", "npm:8.2.6"],
@@ -5431,13 +5430,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]
       ]],
       ["esprima", [
-        ["npm:2.4.1", {
-          "packageLocation": "./.yarn/cache/esprima-npm-2.4.1-75ff012101-dfedf9bcd0.zip/node_modules/esprima/",
-          "packageDependencies": [
-            ["esprima", "npm:2.4.1"]
-          ],
-          "linkType": "HARD",
-        }],
         ["npm:4.0.1", {
           "packageLocation": "./.yarn/cache/esprima-npm-4.0.1-1084e98778-5df45a3d9c.zip/node_modules/esprima/",
           "packageDependencies": [
@@ -7137,16 +7129,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
-      ["loose-json", [
-        ["npm:1.1.2", {
-          "packageLocation": "./.yarn/cache/loose-json-npm-1.1.2-7163698a9d-977662b98b.zip/node_modules/loose-json/",
-          "packageDependencies": [
-            ["loose-json", "npm:1.1.2"],
-            ["esprima", "npm:2.4.1"]
-          ],
-          "linkType": "HARD",
-        }]
-      ]],
       ["lowlight", [
         ["npm:1.17.0", {
           "packageLocation": "./.yarn/cache/lowlight-npm-1.17.0-7b115fb21f-fcace406f8.zip/node_modules/lowlight/",
@@ -7465,7 +7447,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@parcel/transformer-posthtml", "npm:2.0.0-nightly.612"],
             ["@types/babel__core", "npm:7.1.12"],
             ["@types/node", "npm:14.14.31"],
-            ["loose-json", "npm:1.1.2"],
             ["near-api-js", "npm:0.36.2"],
             ["parcel", "npm:2.0.0-nightly.610"],
             ["postcss", "npm:8.2.6"],

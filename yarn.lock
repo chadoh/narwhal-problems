@@ -3988,16 +3988,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esprima@npm:2.4.1":
-  version: 2.4.1
-  resolution: "esprima@npm:2.4.1"
-  bin:
-    esparse: ./bin/esparse.js
-    esvalidate: ./bin/esvalidate.js
-  checksum: dfedf9bcd0e85d4b912f1c74cc024c20e1e9d52f2967441ab22e9580b29c7a96b94534ab6e63aa4371f98e5cfe0173f916016b45530b4743db081e5ad2780f51
-  languageName: node
-  linkType: hard
-
 "esprima@npm:^4.0.0, esprima@npm:^4.0.1":
   version: 4.0.1
   resolution: "esprima@npm:4.0.1"
@@ -5498,15 +5488,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loose-json@npm:^1.1.2":
-  version: 1.1.2
-  resolution: "loose-json@npm:1.1.2"
-  dependencies:
-    esprima: 2.4.1
-  checksum: 977662b98b0348ca651319db6cb9c8d187cc23663f3eddb142a9a4f8dbba20feb3f626297ecac0a8cd7e6282fd06da97c66510fea590c2a288ee5e01a202525f
-  languageName: node
-  linkType: hard
-
 "lowlight@npm:~1.17.0":
   version: 1.17.0
   resolution: "lowlight@npm:1.17.0"
@@ -5801,7 +5782,6 @@ __metadata:
     "@parcel/transformer-posthtml": 2.0.0-nightly.612+8a4fa3ee
     "@types/babel__core": ^7
     "@types/node": ^14.14.31
-    loose-json: ^1.1.2
     near-api-js: ^0.36.2
     parcel: nightly
     postcss: ^8.2.1

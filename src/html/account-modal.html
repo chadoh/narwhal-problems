@@ -1,0 +1,120 @@
+<div id="account-form-modal" class="modal" style="display: none">
+  <form class="account-form">
+    <header>
+      <h2>Account</h2>
+    </header>
+    <p class="input">
+      <label for="wallet_location">Wallet Location <abbr title="required">*</abbr></label>
+      <input id="wallet_location" name="wallet_location" required>
+      <span class="hint">
+        Enter anything you want here. This is how YOU remember where this
+        wallet is. Maybe "ledger X" or "trust wallet" or the first word of your
+        hardware wallet's seed phrase.
+      </span>
+    </p>
+    <p class="input">
+      <label for="public_key">Public Key</label>
+      <input id="public_key" name="public_key">
+      <span class="hint">If you want to keep track of the public key you use with this account (useful for accounts tied to a specific Ledger wallet).</span>
+    </p>
+    <p class="input">
+      <label for="hd_path">HD Path</label>
+      <input id="hd_path" name="hd_path">
+      <span class="hint">If you generate multiple NEAR Wallets with a single Ledger seed phrase, each will have its own HD Path.</span>
+    </p>
+    <p class="input">
+      <label for="account_name">Account Name <abbr title="required">*</abbr></label>
+      <input id="account_name" name="account_name" required>
+      <span class="hint">Either the implicit account name (a long hex address like <code>1d1c3b…</code>) or a named account like <code>you.near</code>.</span>
+    </p>
+    <p class="input">
+      <label for="starting_balance">Starting Balance <abbr title="required">*</abbr></label>
+      <input type="number" id="starting_balance" name="starting_balance" required>
+      <span class="hint">Keep track of how much you've gained in staking rewards by entering the balance this account started with (in NEAR, not yoctoNEAR).</span>
+    </p>
+    <p class="input">
+      <label for="lockup_contract">Lockup Contract</label>
+      <input id="lockup_contract" name="lockup_contract">
+      <span class="hint">If your tokens are on a vesting/unlocking schedule, you will have a Lockup Contract like <code>1d1c3b….lockup.near</code></span>
+    </p>
+    <p class="input">
+      <label for="delegated_to">Delegated To</label>
+      <input id="delegated_to" name="delegated_to">
+      <span class="hint">Are you delegating your tokens? To what validator?</span>
+    </p>
+    <!-- TODO: allow adding unlimited extra fields -->
+    <footer>
+      <button id="save-account" disabled class="full-width">
+        Save
+      </button>
+      <a href="#" class="cancel">
+        Cancel
+      </a>
+    </footer>
+  </form>
+</div>
+
+<style>
+.account-form h2.new:before {
+  content: "New ";
+}
+.account-form h2.edit:before {
+  content: "Edit ";
+}
+</style>
+
+ <script>
+   const modal = document.querySelector('#account-form-modal')
+   const form = modal.querySelector('form')
+   const saveButton = modal.querySelector('#save-account')
+
+   async function saveAccount (e) {
+     e.preventDefault()
+     const data = Object.fromEntries(new FormData(e.target).entries())
+     // strip out unfilled fields
+     for (key in data) {
+       if (!data[key]) delete data[key]
+     }
+     const accounts = await window.accounts.get()
+     const i = accounts.findIndex(acct => acct.account_name === data.account_name)
+     if (i >= 0) {
+       accounts[i] = data
+       window.accounts.set(accounts)
+     } else {
+       window.accounts.set([...accounts, data])
+     }
+     window.location.hash = ''
+     form.reset()
+   }
+
+   function checkCanSubmit () {
+     const requiredInputs = form.querySelectorAll('input[required]')
+     const filled = Array.from(requiredInputs).reduce(
+       (bool, input) => bool && !!input.value,
+       true
+     )
+     if (filled) saveButton.disabled = false
+     else saveButton.disabled = true
+   }
+
+   form.addEventListener('submit', saveAccount)
+   form.addEventListener('keyup', checkCanSubmit)
+
+   window.renderers.push(async function renderAccountModal() {
+     // hide and return early if window hash not matched
+     if (!/#(new|edit-account)/.test(window.location.hash)) {
+       modal.style.display = 'none'
+       return
+     }
+
+     // adjust modal title
+     if (/new/.test(window.location.hash)) {
+       modal.querySelector('h2').classList.add('new')
+     } else {
+       modal.querySelector('h2').classList.add('edit')
+     }
+
+     // show the modal
+     modal.style.removeProperty('display')
+   })
+ </script>

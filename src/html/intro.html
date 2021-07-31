@@ -48,7 +48,7 @@
 
 <script>
   window.renderers.push(async function renderIntro({ accounts }) {
-    if (accounts) {
+    if (accounts.length) {
       document.querySelector('#intro').style.display = 'none'
     } else {
       document.querySelector('#intro').style.display = 'block'
