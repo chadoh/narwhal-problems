@@ -326,10 +326,10 @@
                 <label>Current Balance</label>
                 ${window.utils.formatLargeNum(current_balance)}
               </div>
-              <div class="account__datum">
+              ${!lockup_contract ? '' : `<div class="account__datum">
                 <label>Lockup Contract</label>
                 ${link(lockup_contract)}
-              </div>
+              </div>`}
               ${!delegated_to ? '' : `<div class="account__datum">
                 <label>Delegated to</label>
                 ${link(delegated_to)}
