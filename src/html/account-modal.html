@@ -70,17 +70,26 @@
 
    async function saveAccount (e) {
      e.preventDefault()
+
+     // get new account data
      const data = Object.fromEntries(new FormData(e.target).entries())
      // strip out unfilled fields
      for (key in data) {
        if (!data[key]) delete data[key]
      }
+
+     // get current saved accounts
      const accounts = await window.accounts.get()
-     const i = accounts.findIndex(acct => acct.account_name === data.account_name)
+     // check if editing
+     const i = accounts.findIndex(({ account_name }) =>
+       form.dataset.originalName === account_name
+     )
      if (i >= 0) {
+       // update existing account
        accounts[i] = data
        window.accounts.set(accounts)
      } else {
+       // save new account
        window.accounts.set([...accounts, data])
      }
      window.location.hash = ''
@@ -100,18 +109,42 @@
    form.addEventListener('submit', saveAccount)
    form.addEventListener('keyup', checkCanSubmit)
 
+   async function getAccountFromUrl() {
+     const matchData = window.location.hash.match(/#edit=(.*)/)
+     const name = matchData && matchData[1]
+     return name && (await window.accounts.get()).find(a =>
+       a.account_name === name
+     )
+   }
+
+   function fillForm(data) {
+     for (key in data) {
+       form.elements[key].value = data[key]
+     }
+   }
+
    window.renderers.push(async function renderAccountModal() {
-     // hide and return early if window hash not matched
-     if (!/#(new|edit-account)/.test(window.location.hash)) {
+     // if window hash not matched, hide and return early
+     if (!/#(new|edit)/.test(window.location.hash)) {
        modal.style.display = 'none'
        return
      }
 
-     // adjust modal title
-     if (/new/.test(window.location.hash)) {
-       modal.querySelector('h2').classList.add('new')
-     } else {
+     // else, reset form in case of canceled edit followed by editing another
+     form.reset()
+
+     const account = await getAccountFromUrl()
+
+     if (account) {
+       // adjust modal title and fill form
        modal.querySelector('h2').classList.add('edit')
+       fillForm(account)
+
+       // hold onto original name for use when saving
+       form.dataset.originalName = account.account_name
+     } else {
+       // just adjust modal title
+       modal.querySelector('h2').classList.add('new')
      }
 
      // show the modal

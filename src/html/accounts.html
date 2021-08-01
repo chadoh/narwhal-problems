@@ -150,6 +150,33 @@
     content: "→";
   }
 
+  .account__actions {
+    display: flex;
+    height: 2.4em;
+  }
+
+  .account__actions .button--cta {
+    background-color: var(--color--account-actions--cta);
+    color: white;
+    text-decoration: none;
+  }
+
+  /* ensure proper functionality whether link or button element */
+  .account__actions .button--cta:hover,
+  .account__actions .button--cta:focus {
+    color: white;
+  }
+
+  .account__actions .button--delete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color--account-actions--delete) !important;
+    margin-left: var(--spacing-s);
+    padding: 0;
+    width: var(--input-height--small);
+  }
+
   .account__datum {
     border-top: 1px solid var(--color--accounts-divider);
     display: grid;
@@ -308,6 +335,14 @@
                   displayValidatorStatus(validator_status, current_balance - starting_balance)
                 }</span>
               </div>
+            </div>
+            <div class="account__actions">
+              <a
+                href="#edit=${account_name}"
+                class="button button--cta button-size--small"
+              >
+                Edit
+              </a>
             </div>
           </header>
           <div class="account__body">
