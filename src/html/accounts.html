@@ -17,7 +17,7 @@
     }
   }
 
-  .account.undelegated {
+  .undelegated {
     --color--account-header: var(--blue-300);
     --color--account-location: var(--blue-800);
     --color--account-validator-status: var(--blue-700);
@@ -31,7 +31,8 @@
     --color--footer-text: var(--blue-500);
     --color--footer-caret: var(--blue-500);
   }
-  .account.validator-active {
+
+  .validator-active {
     --color--account-header: var(--green-300);
     --color--account-location: var(--green-800);
     --color--account-validator-status: var(--green-700);
@@ -45,8 +46,9 @@
     --color--footer-text: var(--green-600);
     --color--footer-caret: var(--green-500);
   }
-  .account.validator-next,
-  .account.validator-proposed {
+
+  .validator-next,
+  .validator-proposed {
     --color--account-header: var(--orange-300);
     --color--account-location: var(--orange-800);
     --color--account-validator-status: var(--orange-700);
@@ -60,7 +62,8 @@
     --color--footer-text: var(--orange-700);
     --color--footer-caret: var(--orange-500);
   }
-  .account.validator-inactive {
+
+  .validator-inactive {
     --color--account-header: var(--red-300);
     --color--account-location: var(--red-800);
     --color--account-validator-status: var(--red-700);
@@ -92,6 +95,7 @@
     color: inherit;
     text-decoration: underline;
   }
+
   .account a:focus,
   .account a:hover {
     color: var(--color--footer-text);
@@ -133,24 +137,30 @@
     height: var(--spacing-m);
   }
 
-  .account.validator-active > header .account__validator-status .icon {
+  .account.validator-active>header .account__validator-status .icon {
     background-image: url(img/wallet.svg);
   }
 
-  .account.validator-proposed > header .account__validator-status .icon,
-  .account.validator-next > header .account__validator-status .icon {
+  .account.validator-proposed>header .account__validator-status .icon,
+  .account.validator-next>header .account__validator-status .icon {
     background-image: url(img/alert-triangle.svg);
   }
 
-  .account.validator-inactive > header .account__validator-status .icon {
+  .account.validator-inactive>header .account__validator-status .icon {
     background-image: url(img/alert-circle.svg);
   }
 
-  .account.undelegated > header .account__validator-status .icon:before {
+  .account.undelegated>header .account__validator-status .icon {
+    margin-right: 0;
+  }
+
+  .account.undelegated>header .account__validator-status .icon:before {
     content: "→";
+    vertical-align: middle;
   }
 
   .account__actions {
+    align-items: center;
     display: flex;
     height: 2.4em;
   }
@@ -167,14 +177,71 @@
     color: white;
   }
 
-  .account__actions .button--delete {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--color--account-actions--delete) !important;
-    margin-left: var(--spacing-s);
-    padding: 0;
-    width: var(--input-height--small);
+  .account__actions .button-group {
+    display: grid;
+    grid-column-gap: 1px;
+    grid-template-columns: auto auto;
+  }
+
+  .account__actions .button-group :first-child {
+    border-radius: var(--br-small) 0 0 var(--br-small);
+  }
+
+  /* the drop-down button */
+  .account__actions .button-group :last-child {
+    border-radius: 0 var(--br-small) var(--br-small) 0;
+    padding-left: var(--spacing-s);
+    padding-right: var(--spacing-s);
+  }
+
+  .account__actions-dropdown {
+    background-color: var(--color--account-header);
+    border: 1px solid var(--color--account-actions--cta);
+    border-radius: var(--br-small);
+    padding: var(--spacing-s) var(--spacing-m);
+    position: absolute;
+    z-index: 1;
+  }
+
+  .account__actions-dropdown:before,
+  .account__actions-dropdown:after {
+    content: "";
+    display: inline-block;
+    position: absolute;
+  }
+
+  .account__actions-dropdown:before {
+    border: 8px solid transparent;
+    border-bottom: 8px solid var(--color--account-actions--cta);
+    right: calc(var(--spacing-m) + 2px);
+    top: -16px;
+  }
+
+  .account__actions-dropdown:after {
+    border: 7px solid transparent;
+    border-bottom: 7px solid var(--color--account-header);
+    right: calc(var(--spacing-m) + 3px);
+    top: -14px;
+  }
+
+  .account__actions-dropdown button {
+    color: var(--color--account-location);
+    border-radius: 0;
+    display: block;
+    text-align: left;
+    height: auto;
+    line-height: 1.5;
+    font-size: var(--fs-micro);
+    margin-bottom: var(--spacing-s);
+  }
+
+  .account__actions-dropdown button:first-child {
+    margin-top: 0;
+  }
+
+  .account__actions-dropdown button:last-child {
+    border-radius: 0 0 var(--br-small) var(--br-small);
+    margin-bottom: 0;
   }
 
   .account__datum {
@@ -249,7 +316,118 @@
   // tracks UI state for which accounts have "view details" open
   const openAccountDetails = {};
 
-  document.querySelector("body").addEventListener("click", (event) => {
+  const accountActions = {
+    'Edit': account_name => {
+      window.location.hash = `#edit=${account_name}`
+    },
+    'Delete': async account_name => {
+      if (confirm("Are you sure? This can't be undone.")) {
+        window.accounts.set(
+          (await window.accounts.get()).filter(account =>
+            account.account_name !== account_name
+          )
+        )
+      }
+    },
+  }
+
+  const actionButton = (name, className = 'link') => `
+    <button
+      class="${className}"
+      data-behavior="actOnAccount"
+    >${name}</button>
+  `;
+
+  const actionNames = Object.keys(accountActions);
+
+  // mutates actionNames, removes first
+  const firstAction = actionButton(
+    actionNames.shift(),
+    'button--cta button-size--small'
+  );
+
+  const actionsDropdown = document.createElement('div');
+  actionsDropdown.classList.add('account__actions-dropdown');
+  actionsDropdown.innerHTML =
+    actionNames.map(a => actionButton(a)).join('');
+
+  document.querySelector("body").addEventListener("click", async function actOnAccount(event) {
+    const actOnAccountButton = event.target.closest(
+      "[data-behavior=actOnAccount]"
+    );
+
+    // no details button clicked, end here
+    if (!actOnAccountButton) return;
+
+    const dropdown = actOnAccountButton.closest(".account__actions-dropdown");
+    const accountsDiv = actOnAccountButton.closest(".account");
+    const account = (dropdown || accountsDiv).dataset.accountName;
+    const actionName = actOnAccountButton.innerHTML;
+    const action = accountActions[actionName];
+    if (dropdown) closeActionsDropdown(dropdown);
+    await action(account);
+  });
+
+  function openActionsDropdown(toggleButton) {
+    const accountDiv = toggleButton.closest('.account')
+    const { accountName } = accountDiv.dataset;
+    const colorClass = accountDiv.className.replace('account ', '');
+    const { right } = accountDiv.getBoundingClientRect();
+    const { bottom } = toggleButton.getBoundingClientRect();
+
+    actionsDropdown.dataset.accountName = accountName;
+    actionsDropdown.classList.add(colorClass);
+    actionsDropdown.style.top = bottom + window.scrollY + 9 + 'px';
+    actionsDropdown.style.right = document.body.offsetWidth - right + 'px';
+
+    document.body.appendChild(actionsDropdown);
+  }
+
+  function closeActionsDropdown(dropdown) {
+    const oldAccountName = dropdown.dataset.accountName
+    const oldAccountDiv = document.querySelector(
+      `.account[data-account-name="${oldAccountName}"]`
+    )
+    const oldColorClass = oldAccountDiv.className.replace('account ', '');
+
+    dropdown.classList.remove(oldColorClass);
+    dropdown.remove();
+
+    return oldAccountName
+  }
+
+  document.querySelector("body").addEventListener("click", async function toggleActionsDropdown(event) {
+    const toggleActionsButton = event.target.closest(
+      "[data-behavior=toggleActionsDropdown]"
+    );
+    const openDropdown = document.querySelector('.account__actions-dropdown')
+
+    if (toggleActionsButton) {
+      if (openDropdown) {
+        // if toggleActionsButton matches openActionsDropdown, close openActionsDropdown
+        // else, close old, open new
+        // translated: always close old, then open new if they don't match
+        const oldAccountName = closeActionsDropdown(openDropdown)
+        const { accountName } = toggleActionsButton.closest(".account").dataset;
+        if (oldAccountName !== accountName) {
+          openActionsDropdown(toggleActionsButton)
+        }
+      } else {
+        openActionsDropdown(toggleActionsButton)
+      }
+    } else {
+      if (openDropdown) {
+        // If clicked outside, close. Else, do nothing.
+        if (!openDropdown.contains(event.target)) {
+          closeActionsDropdown(openDropdown)
+        }
+      } else {
+        // do nothing
+      }
+    }
+  });
+
+  document.querySelector("body").addEventListener("click", function toggleDetails(event) {
     const accountDetailsButton = event.target.closest(
       "[data-behavior=openAccountDetails]"
     );
@@ -257,7 +435,7 @@
     // no details button clicked, end here
     if (!accountDetailsButton) return;
 
-    const account = accountDetailsButton.closest(".account").id;
+    const account = accountDetailsButton.closest(".account").dataset.accountName;
     const footer = accountDetailsButton.closest("footer");
     openAccountDetails[account] = !openAccountDetails[account];
     footer.classList.toggle("open");
@@ -289,7 +467,7 @@
     </a>
   `
 
-  function displayValidatorStatus (status, earnings) {
+  function displayValidatorStatus(status, earnings) {
     if (!status)
       return 'earn $NEAR, secure the network; <a target="_blank" href="https://docs.near.org/docs/validator/delegation">delegate</a>'
     if (status === 'active')
@@ -299,7 +477,7 @@
     if (status === 'proposed')
       return 'validator inactive; <a target="_blank" href="https://explorer.near.org/nodes/proposals">back soon?</a>'
     return 'validator inactive; <a target="_blank" href="https://docs.near.org/docs/validator/delegation">pick a new one</a>'
-}
+  }
 
   window.renderers.push(async function renderAccounts({ accounts }) {
     if (!accounts) return
@@ -321,28 +499,29 @@
       }) => (`
         <div
            class="account ${!delegated_to
-             ? 'undelegated'
-             : `validator-${validator_status}`
-           }"
-           id=${account_name}
+          ? 'undelegated'
+          : `validator-${validator_status}`
+        }"
+           data-account-name=${account_name}
         >
           <header class="account__header">
             <div>
               <h2 class="account__location">${wallet_location}</h2>
               <div class="account__validator-status">
                 <span class="icon"></span>
-                <span>${
-                  displayValidatorStatus(validator_status, current_balance - starting_balance)
-                }</span>
+                <span>${displayValidatorStatus(validator_status, current_balance - starting_balance)
+        }</span>
               </div>
             </div>
             <div class="account__actions">
-              <a
-                href="#edit=${account_name}"
-                class="button button--cta button-size--small"
-              >
-                Edit
-              </a>
+              <div class="button-group">
+                ${firstAction}
+                <button
+                  title="more actions"
+                  class="button--cta button-size--small button--more"
+                  data-behavior="toggleActionsDropdown"
+                >▾</button>
+              </div>
             </div>
           </header>
           <div class="account__body">
@@ -359,9 +538,8 @@
               ${link(account_name)}
             </div>
           </div>
-          <footer class="account__footer ${
-            openAccountDetails[account_name] ? "open" : ""
-          }">
+          <footer class="account__footer ${openAccountDetails[account_name] ? "open" : ""
+        }">
             <div class="account__details">
               <div class="account__datum">
                 <label>Starting Balance</label>
