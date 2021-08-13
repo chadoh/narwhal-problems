@@ -495,6 +495,7 @@
         lockup_contract,
         delegated_to, // possibly undefined
         validator_status, // possibly undefined
+        hd_path, // possibly undefined
         ...extra
       }) => (`
         <div
@@ -541,6 +542,10 @@
           <footer class="account__footer ${openAccountDetails[account_name] ? "open" : ""
         }">
             <div class="account__details">
+              ${!hd_path ? '' : `<div class="account__datum">
+                <label>HD Path</label>
+                ${hd_path}
+              </div>`}
               <div class="account__datum">
                 <label>Starting Balance</label>
                 ${window.utils.formatLargeNum(starting_balance)}
