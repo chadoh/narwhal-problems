@@ -107,7 +107,7 @@
     } else {
       exportImportButton.innerText = 'Import data from a backup'
     }
-    const str = JSON.stringify(accounts)
+    const str = JSON.stringify(accounts, null, 2);
     if (oldAccounts !== str) {
       textarea.value = str;
       oldAccounts = str;
