@@ -1,0 +1,270 @@
+<div id="account-form-modal" class="modal" style="display: none">
+  <form class="account-form">
+    <header>
+      <h2>Account</h2>
+    </header>
+    <p class="input">
+      <label for="wallet_location">Wallet Location <abbr title="required">*</abbr></label>
+      <input id="wallet_location" name="wallet_location" required autoComplete="off">
+      <span class="hint">Enter anything you want here. This is how YOU remember where this wallet is. Maybe "ledger X"
+        or the first word of your hardware wallet's seed phrase.</span>
+    </p>
+    <p class="input">
+      <label for="public_key">Public Key</label>
+      <input id="public_key" name="public_key" autoComplete="off">
+      <span class="hint">If you want to keep track of the public key you use with this account (useful for accounts tied
+        to a specific Ledger wallet).</span>
+    </p>
+    <p class="input">
+      <label for="hd_path">HD Path</label>
+      <input id="hd_path" name="hd_path" autoComplete="off">
+      <span class="hint">If you generate multiple NEAR Wallets with a single Ledger seed phrase, each will have its own
+        HD Path.</span>
+    </p>
+    <p class="input">
+      <label for="account_name">Account Name <abbr title="required">*</abbr></label>
+      <input id="account_name" name="account_name" required autoComplete="off">
+      <span class="hint">Either the implicit account name (a long hex address like <code>1d1c3b…</code>) or a named
+        account like <code>you.near</code>.</span>
+    </p>
+    <p class="input">
+      <label for="starting_balance">Starting Balance <abbr title="required">*</abbr></label>
+      <input type="number" id="starting_balance" name="starting_balance" required autoComplete="off">
+      <span class="hint">Keep track of how much you've gained in staking rewards by entering the balance this account
+        started with (in NEAR, not yoctoNEAR).</span>
+    </p>
+    <p class="input">
+      <label for="lockup_contract">Lockup Contract <abbr title="required">*</abbr></label>
+      <input id="lockup_contract" name="lockup_contract" required autoComplete="off">
+      <span class="hint">If your tokens are on a vesting/unlocking schedule, you will have a Lockup Contract like
+        <code>1d1c3b….lockup.near</code>. Narwhal Problems does not work with non-lockup accounts.</span>
+    </p>
+    <p class="input">
+      <label for="delegated_to">Delegated To</label>
+      <input id="delegated_to" name="delegated_to" autoComplete="off">
+      <span class="hint">Are you delegating your tokens? To what validator?</span>
+    </p>
+    <div class="account-form__extra-fields" data-behavior="extraFields">
+    </div>
+    <p>
+      <button type="button" data-behavior="addExtraField">
+        + Add Field
+      </button>
+    </p>
+    <footer>
+      <button id="save-account" disabled class="full-width">
+        Save
+      </button>
+      <a href="#" class="cancel">
+        Cancel
+      </a>
+    </footer>
+  </form>
+</div>
+
+<style>
+  .account-form h2.new:before {
+    content: "New ";
+  }
+
+  .account-form h2.edit:before {
+    content: "Edit ";
+  }
+
+  .account-form__extra-fields p.input {
+    display: grid;
+    grid-gap: var(--spacing-m);
+    grid-template-columns: 1fr 1fr auto;
+    align-items: end;
+  }
+
+  .account-form__extra-fields button {
+    padding: var(--spacing-s);
+  }
+
+  .account-form__extra-fields button:focus,
+  .account-form__extra-fields button:hover {
+    background-color: var(--red-100);
+  }
+
+  .account-form__extra-fields button:active {
+    background-color: var(--red-200);
+  }
+</style>
+
+<script>
+  const modal = document.querySelector('#account-form-modal')
+  const form = modal.querySelector('form')
+  const saveButton = modal.querySelector('#save-account')
+  const extraFieldsDiv = document.querySelector('[data-behavior="extraFields"]')
+
+  function extraField(id, { key = '', value = '' }) {
+    const p = document.createElement('p');;
+    p.classList.add('input');
+    p.id = 'extraField' + id;
+    p.innerHTML = `
+      <span>
+        <label for="extraKey${id}">Name</label>
+        <input id="extraKey${id}" name="extraKey${id}" autoComplete="off" value=${key}>
+      </span>
+      <span>
+        <label for="extraValue${id}">Value</label>
+        <input id="extraValue${id}" name="extraValue${id}" autoComplete="off" value="${value}">
+      </span>
+      <button type="button" title="delete extra field" class="link" data-behavior="deleteExtraField">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: relative; top: -3px;">
+          <path d="M2 4H3.33333H14" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M5.3335 4.00004V2.66671C5.3335 2.31309 5.47397 1.97395 5.72402 1.7239C5.97407 1.47385 6.31321 1.33337 6.66683 1.33337H9.3335C9.68712 1.33337 10.0263 1.47385 10.2763 1.7239C10.5264 1.97395 10.6668 2.31309 10.6668 2.66671V4.00004M12.6668 4.00004V13.3334C12.6668 13.687 12.5264 14.0261 12.2763 14.2762C12.0263 14.5262 11.6871 14.6667 11.3335 14.6667H4.66683C4.31321 14.6667 3.97407 14.5262 3.72402 14.2762C3.47397 14.0261 3.3335 13.687 3.3335 13.3334V4.00004H12.6668Z" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M6.6665 7.33337V11.3334" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9.3335 7.33337V11.3334" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    `;
+    return p;
+  }
+
+  function addExtraField({ key, value }) {
+    let extraFields = Array.from(extraFieldsDiv.querySelectorAll('p.input'))
+    // get ID of last extra field in DOM, or default to 0
+    const nextId = extraFields.length
+      ? parseInt(extraFields[extraFields.length - 1].id.replace('extraField', '')) + 1
+      : 0;
+
+    // add to DOM
+    extraFieldsDiv.appendChild(extraField(nextId, { key, value }))
+
+    // focus new field
+    extraFields = Array.from(extraFieldsDiv.querySelectorAll('p.input'));
+    extraFields[extraFields.length - 1].querySelector('input').focus()
+  }
+
+  document.querySelector('[data-behavior="addExtraField"]').addEventListener('click', addExtraField)
+
+  document.body.addEventListener('click', function deleteExtraField(event) {
+    const deleteButton = event.target.closest('[data-behavior="deleteExtraField"]');
+    if (!deleteButton) return;
+
+    const fieldsFilled = Array.from(
+      deleteButton.closest('p.input').querySelectorAll('input')
+    ).map(i => i.value).join('');
+
+    function deleteField() {
+      deleteButton.closest('p.input').remove();
+    }
+
+    if (!fieldsFilled) {
+      deleteField()
+    } else if (confirm("Really delete this field?")) {
+      deleteField()
+    }
+  })
+
+  async function saveAccount(e) {
+    e.preventDefault()
+
+    // get new account data
+    const data = Object.fromEntries(new FormData(e.target).entries())
+
+    // add extra fields to main object
+    Object.keys(data).filter(k => k.match(/^extraKey/)).forEach(keyGetter => {
+      const valueGetter = keyGetter.replace('Key', 'Value')
+      const newKey = data[keyGetter]
+      const newValue = data[valueGetter]
+      data[newKey] = newValue
+      delete data[keyGetter]
+      delete data[valueGetter]
+    })
+
+    // strip out unfilled fields
+    for (key in data) {
+      if (!data[key]) delete data[key]
+    }
+
+    // get current saved accounts
+    const accounts = await window.accounts.get()
+    // check if editing
+    const i = accounts.findIndex(({ account_name }) =>
+      form.dataset.originalName === account_name
+    )
+    if (i >= 0) {
+      // update existing account
+      accounts[i] = data
+      window.accounts.set(accounts)
+    } else {
+      // save new account
+      window.accounts.set([...accounts, data])
+    }
+    window.location.hash = ''
+    form.reset()
+  }
+
+  function checkCanSubmit() {
+    const requiredInputs = form.querySelectorAll('input[required]')
+    const filled = Array.from(requiredInputs).reduce(
+      (bool, input) => bool && !!input.value,
+      true
+    )
+    if (filled) saveButton.disabled = false
+    else saveButton.disabled = true
+  }
+
+  form.addEventListener('submit', saveAccount)
+  form.addEventListener('keyup', checkCanSubmit)
+
+  async function getAccountFromUrl() {
+    const matchData = window.location.hash.match(/#edit=(.*)/)
+    const name = matchData && matchData[1]
+    return name && (await window.accounts.get()).find(a =>
+      a.account_name === name
+    )
+  }
+
+  function fillForm(data) {
+    // only want to fill in extra fields when form is first shown
+    const extraFieldsInitialized = extraFieldsDiv.dataset.initialized;
+
+    for (key in data) {
+      if (form.elements[key]) {
+        form.elements[key].value = data[key]
+      } else if (!extraFieldsInitialized) {
+        addExtraField({ key, value: data[key] })
+      }
+    }
+
+    extraFieldsDiv.dataset.initialized = true;
+  }
+
+  function clearExtraFields() {
+    extraFieldsDiv.innerHTML = '';
+    delete extraFieldsDiv.dataset.initialized;
+  }
+
+  window.renderers.push(async function renderAccountModal() {
+    // if window hash not matched, hide and return early
+    if (!/#(new|edit)/.test(window.location.hash)) {
+      modal.style.display = 'none'
+      clearExtraFields()
+      return
+    }
+
+    // else, reset form in case of canceled edit followed by editing another
+    form.reset()
+
+    const account = await getAccountFromUrl()
+
+    if (account) {
+      // adjust modal title and fill form
+      modal.querySelector('h2').classList.add('edit')
+      fillForm(account)
+
+      // hold onto original name for use when saving
+      form.dataset.originalName = account.account_name
+    } else {
+      // just adjust modal title
+      modal.querySelector('h2').classList.add('new')
+    }
+
+    // show the modal
+    modal.style.removeProperty('display')
+  })
+</script>

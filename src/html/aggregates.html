@@ -2,7 +2,7 @@
 
 <script>
   window.renderers.push(async function renderAccounts({ accounts }) {
-    if (!accounts) return
+    if (!accounts.length) return
 
     const container = document.querySelector('#aggregates')
     if (!container) return

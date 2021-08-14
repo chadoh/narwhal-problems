@@ -1,21 +1,26 @@
-import parse from 'loose-json'
 import near from './near'
 import { getStatus, ValidatorStatus } from './validators'
 
-interface Account {
+// accounts as they exist in local storage
+interface RawAccount {
   wallet_location: string;
   public_key?: string;
   account_name: string;
+  hd_path?: string;
   starting_balance: number;
-  current_balance?: number;
   lockup_contract: string;
   delegated_to?: string;
+};
+
+type Account = RawAccount & {
+  current_balance?: number;
   validator_status?: ValidatorStatus
 }
 
 interface AccountsCache {
-  raw?: string;
-  parsed?: Account[];
+  raw: string;
+  parsed: RawAccount[];
+  decorated: Account[];
 }
 
 const balancesCache: { [key: string]: number } = {}
@@ -29,8 +34,8 @@ async function checkBalance(
   poolId: string,
   lockupId: string
 ): Promise<number> {
-  const cacheKey = poolId+lockupId
-  if (balancesCache[cacheKey]) return balancesCache[cacheKey]
+  const cacheKey = poolId + lockupId
+  if (balancesCache[cacheKey]) return balancesCache[cacheKey]!
   // near-api-js requires instantiating an "account" object, but this is NOT
   // used to sign view functions, and so the lockupId passed in doesn't
   // matter. Passing poolId to be doubly sure that no lockupIds get
@@ -42,55 +47,65 @@ async function checkBalance(
     { account_id: lockupId }
   )
   balancesCache[cacheKey] = yocto / 1e24
-  return balancesCache[cacheKey]
+  return balancesCache[cacheKey]!
 }
 
 const onChangeFns: (() => {})[] = []
 
-const accountsCache: AccountsCache = {}
+const accountsCache: AccountsCache = {
+  raw: '[]',
+  parsed: [],
+  decorated: [],
+}
 
-/**
- * Get all accounts
- * @returns an array of Account objects, or null
- */
-export async function get(): Promise<null | Account[]> {
+async function updateAccountsCache(): Promise<void> {
   const raw = localStorage.getItem('accounts')
-  if (!raw) return null
 
-  if (raw === accountsCache.raw) {
-    return accountsCache.parsed as Account[]
+  if (!raw || raw === accountsCache.raw) {
+    return;
   }
 
   accountsCache.raw = raw
-  accountsCache.parsed = await Promise.all(parse(raw).map(
-    async (account: Account) => ({
-      ...account,
-      current_balance: account.delegated_to &&
-        await checkBalance(account.delegated_to, account.lockup_contract),
-      validator_status: account.delegated_to &&
-        await getStatus(account.delegated_to)
-    })
+  accountsCache.parsed = JSON.parse(raw) as RawAccount[]
+  accountsCache.decorated = await Promise.all(accountsCache.parsed.map(
+    async (account: Account) => {
+      if (account.delegated_to) {
+        account.current_balance = await checkBalance(
+          account.delegated_to, account.lockup_contract
+        )
+        account.validator_status = await getStatus(account.delegated_to)
+      }
+      return account
+    }
   ))
-
-  return accountsCache.parsed as Account[]
 }
 
 /**
- * Get raw account data as stored in localStorage.
- * This may have spaces and comments in it.
+ * Get all accounts
+ * @returns array of {@link Account} objects
  */
-export async function getRaw(): Promise<null | string> {
-  return localStorage.getItem('accounts')
+export async function get(): Promise<Account[]> {
+  await updateAccountsCache()
+  return accountsCache.decorated
+}
+
+/**
+ * Get raw accounts, without computed values
+ * @returns array of {@link RawAccount} objects
+ */
+export async function getRaw(): Promise<RawAccount[]> {
+  await updateAccountsCache()
+  return accountsCache.parsed
 }
 
 /**
  * Set localStorage with new accounts and call on functions passed that have
  * been passed to onChange.
  *
- * @param newAccounts json blob of accounts. Can have whitespace
+ * @param newAccounts array of accounts
  */
-export async function set(newAccounts: string) {
-  localStorage.setItem('accounts', newAccounts);
+export async function set(newAccounts: RawAccount[]) {
+  localStorage.setItem('accounts', JSON.stringify(newAccounts));
   await Promise.all(onChangeFns.map(fn => fn()))
 }
 
