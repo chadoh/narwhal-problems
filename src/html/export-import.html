@@ -101,7 +101,7 @@
   // cache accounts so we don't needlessly refresh textarea every time `render` is called
   let oldAccounts = null;
 
-  window.renderers.push(async function renderEditor({ accounts }) {
+  window.renderers.push(async function renderEditor({ accountsRaw: accounts }) {
     if (accounts.length) {
       exportImportButton.innerText = 'Back up your data!'
     } else {

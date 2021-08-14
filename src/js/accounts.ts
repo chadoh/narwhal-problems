@@ -18,8 +18,9 @@ type Account = RawAccount & {
 }
 
 interface AccountsCache {
-  raw?: string;
-  parsed?: Account[];
+  raw: string;
+  parsed: RawAccount[];
+  decorated: Account[];
 }
 
 const balancesCache: { [key: string]: number } = {}
@@ -33,8 +34,8 @@ async function checkBalance(
   poolId: string,
   lockupId: string
 ): Promise<number> {
-  const cacheKey = poolId+lockupId
-  if (balancesCache[cacheKey]) return balancesCache[cacheKey]
+  const cacheKey = poolId + lockupId
+  if (balancesCache[cacheKey]) return balancesCache[cacheKey]!
   // near-api-js requires instantiating an "account" object, but this is NOT
   // used to sign view functions, and so the lockupId passed in doesn't
   // matter. Passing poolId to be doubly sure that no lockupIds get
@@ -46,27 +47,27 @@ async function checkBalance(
     { account_id: lockupId }
   )
   balancesCache[cacheKey] = yocto / 1e24
-  return balancesCache[cacheKey]
+  return balancesCache[cacheKey]!
 }
 
 const onChangeFns: (() => {})[] = []
 
-const accountsCache: AccountsCache = {}
+const accountsCache: AccountsCache = {
+  raw: '[]',
+  parsed: [],
+  decorated: [],
+}
 
-/**
- * Get all accounts
- * @returns Accounts an array of Account objects, or null
- */
-export async function get(): Promise<Account[]> {
+async function updateAccountsCache(): Promise<void> {
   const raw = localStorage.getItem('accounts')
-  if (!raw) return []
 
-  if (raw === accountsCache.raw) {
-    return accountsCache.parsed as Account[]
+  if (!raw || raw === accountsCache.raw) {
+    return;
   }
 
   accountsCache.raw = raw
-  accountsCache.parsed = await Promise.all((JSON.parse(raw) as RawAccount[]).map(
+  accountsCache.parsed = JSON.parse(raw) as RawAccount[]
+  accountsCache.decorated = await Promise.all(accountsCache.parsed.map(
     async (account: Account) => {
       if (account.delegated_to) {
         account.current_balance = await checkBalance(
@@ -77,17 +78,25 @@ export async function get(): Promise<Account[]> {
       return account
     }
   ))
+}
 
+/**
+ * Get all accounts
+ * @returns array of {@link Account} objects
+ */
+export async function get(): Promise<Account[]> {
+  await updateAccountsCache()
+  return accountsCache.decorated
+}
+
+/**
+ * Get raw accounts, without computed values
+ * @returns array of {@link RawAccount} objects
+ */
+export async function getRaw(): Promise<RawAccount[]> {
+  await updateAccountsCache()
   return accountsCache.parsed
 }
-/**
- * Get raw account data as stored in localStorage.
- * This may have spaces and comments in it.
- */
-export async function getRaw(): Promise<null | string> {
-  return localStorage.getItem('accounts')
-}
-
 
 /**
  * Set localStorage with new accounts and call on functions passed that have
