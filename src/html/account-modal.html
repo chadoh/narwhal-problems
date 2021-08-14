@@ -34,10 +34,10 @@
         started with (in NEAR, not yoctoNEAR).</span>
     </p>
     <p class="input">
-      <label for="lockup_contract">Lockup Contract</label>
-      <input id="lockup_contract" name="lockup_contract" autoComplete="off">
+      <label for="lockup_contract">Lockup Contract <abbr title="required">*</abbr></label>
+      <input id="lockup_contract" name="lockup_contract" required autoComplete="off">
       <span class="hint">If your tokens are on a vesting/unlocking schedule, you will have a Lockup Contract like
-        <code>1d1c3b….lockup.near</code></span>
+        <code>1d1c3b….lockup.near</code>. Narwhal Problems does not work with non-lockup accounts.</span>
     </p>
     <p class="input">
       <label for="delegated_to">Delegated To</label>
