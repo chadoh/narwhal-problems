@@ -1,7 +1,7 @@
 import {
   CurrentEpochValidatorInfo, NextEpochValidatorInfo, ValidatorStakeView
 } from 'near-api-js'
-import near from './near'
+import {near} from './near'
 
 export type ValidatorStatus = 'active' | 'next' | 'proposed' | 'inactive'
 

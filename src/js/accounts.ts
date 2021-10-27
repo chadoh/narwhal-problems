@@ -1,4 +1,4 @@
-import near from './near'
+import {view} from './near'
 import { getStatus, ValidatorStatus } from './validators'
 
 // accounts as they exist in local storage
@@ -15,6 +15,7 @@ interface RawAccount {
 type Account = RawAccount & {
   current_balance?: number;
   validator_status?: ValidatorStatus
+  vesting_info: any;
 }
 
 interface AccountsCache {
@@ -40,8 +41,7 @@ async function checkBalance(
   // used to sign view functions, and so the lockupId passed in doesn't
   // matter. Passing poolId to be doubly sure that no lockupIds get
   // de-anonymized.
-  const account = await near.account(poolId)
-  const yocto = await account.viewFunction(
+  const yocto = await view(
     poolId,
     'get_account_total_balance',
     { account_id: lockupId }
@@ -76,6 +76,9 @@ async function updateAccountsCache(): Promise<void> {
           account.delegated_to, account.lockup_contract
         )
         account.validator_status = await getStatus(account.delegated_to)
+      }
+      if (account.lockup_contract) {
+        account.vesting_info = await view(account.lockup_contract, 'get_vesting_information')
       }
       return account
     }

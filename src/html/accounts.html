@@ -261,6 +261,12 @@
     margin: 0;
   }
 
+  .account__datum pre {
+    font-family: var(--monospace);
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
   .account__footer {
     position: relative;
     height: var(--input-height--small);
@@ -496,6 +502,7 @@
         delegated_to, // possibly undefined
         validator_status, // possibly undefined
         hd_path, // possibly undefined
+        vesting_info, // possibly undefined
         ...extra
       }) => (`
         <div
@@ -561,6 +568,10 @@
               ${!delegated_to ? '' : `<div class="account__datum">
                 <label>Delegated to</label>
                 ${link(delegated_to)}
+              </div>`}
+              ${!lockup_contract ? '' : `<div class="account__datum">
+                <label>Vesting Info</label>
+                <pre>${JSON.stringify(vesting_info, null, 2)}</pre>
               </div>`}
               ${Object.entries(extra).map(([key, value]) => `<div class="account__datum">
                 <label>${key}</label>
