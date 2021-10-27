@@ -265,6 +265,7 @@
     font-family: var(--monospace);
     white-space: pre-wrap;
     word-break: break-all;
+    margin: 0;
   }
 
   .account__footer {
@@ -571,7 +572,7 @@
               </div>`}
               ${!lockup_contract ? '' : `<div class="account__datum">
                 <label>Vesting Info</label>
-                <pre>${JSON.stringify(vesting_info, null, 2)}</pre>
+                <pre>${JSON.stringify(vesting_info)}</pre>
               </div>`}
               ${Object.entries(extra).map(([key, value]) => `<div class="account__datum">
                 <label>${key}</label>
