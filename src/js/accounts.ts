@@ -24,30 +24,8 @@ interface AccountsCache {
   decorated: Account[];
 }
 
-const balancesCache: { [key: string]: number } = {}
-
-/**
- * Check balance that given `lockupId` has in given `poolId`
- *
- * Returns a cached balance. Cache is refreshed on page reload.
- */
-async function checkBalance(
-  poolId: string,
-  lockupId: string
-): Promise<number> {
-  const cacheKey = poolId + lockupId
-  if (balancesCache[cacheKey]) return balancesCache[cacheKey]!
-  // near-api-js requires instantiating an "account" object, but this is NOT
-  // used to sign view functions, and so the lockupId passed in doesn't
-  // matter. Passing poolId to be doubly sure that no lockupIds get
-  // de-anonymized.
-  const yocto = await view(
-    poolId,
-    'get_account_total_balance',
-    { account_id: lockupId }
-  )
-  balancesCache[cacheKey] = yocto / 1e24
-  return balancesCache[cacheKey]!
+function toNear(yoctoNear: number | string): number {
+  return Number(yoctoNear) / 1e24
 }
 
 const onChangeFns: (() => {})[] = []
@@ -72,9 +50,11 @@ async function updateAccountsCache(): Promise<void> {
       // make copy of object, otherwise new array stores references to objects in old array
       const account = {...rawAccount} as Account
       if (account.delegated_to) {
-        account.current_balance = await checkBalance(
-          account.delegated_to, account.lockup_contract
-        )
+        account.current_balance = toNear(await view(
+          account.delegated_to,
+          'get_account_total_balance',
+          { account_id: account.lockup_contract }
+        ))
         account.validator_status = await getStatus(account.delegated_to)
       }
       if (account.lockup_contract) {
