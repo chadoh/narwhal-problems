@@ -90,7 +90,7 @@
   textarea.addEventListener('change', async () => {
     try {
       const accounts = JSON.parse(textarea.value);
-      if (accounts !== await window.accounts.get()) {
+      if (JSON.stringify(accounts) !== await window.accounts.get('raw')) {
         await window.accounts.set(accounts);
       }
     } catch (e) {

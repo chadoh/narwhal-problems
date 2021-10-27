@@ -1,11 +1,10 @@
 import {
   get as getAccounts,
-  getRaw as getAccountsRaw,
   set as setAccounts
 } from './accounts'
 
 export default async function render() {
-  const accountsRaw = await getAccountsRaw()
+  const accountsRaw = await getAccounts('undecorated')
   const accounts = await getAccounts()
 
   // avoid race conditions in multiple calls to `getAccounts` by calling once

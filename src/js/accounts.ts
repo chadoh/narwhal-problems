@@ -19,7 +19,7 @@ type Account = RawAccount & {
 
 interface AccountsCache {
   raw: string;
-  parsed: RawAccount[];
+  undecorated: RawAccount[];
   decorated: Account[];
 }
 
@@ -54,7 +54,7 @@ const onChangeFns: (() => {})[] = []
 
 const accountsCache: AccountsCache = {
   raw: '[]',
-  parsed: [],
+  undecorated: [],
   decorated: [],
 }
 
@@ -66,9 +66,11 @@ async function updateAccountsCache(): Promise<void> {
   }
 
   accountsCache.raw = raw
-  accountsCache.parsed = JSON.parse(raw) as RawAccount[]
-  accountsCache.decorated = await Promise.all(accountsCache.parsed.map(
-    async (account: Account) => {
+  accountsCache.undecorated = JSON.parse(raw) as RawAccount[]
+  accountsCache.decorated = await Promise.all(accountsCache.undecorated.map(
+    async (rawAccount: RawAccount) => {
+      // make copy of object, otherwise new array stores references to objects in old array
+      const account = {...rawAccount} as Account
       if (account.delegated_to) {
         account.current_balance = await checkBalance(
           account.delegated_to, account.lockup_contract
@@ -82,20 +84,19 @@ async function updateAccountsCache(): Promise<void> {
 
 /**
  * Get all accounts
- * @returns array of {@link Account} objects
+ *
+ * @param style 'raw' | 'undecorated' | 'decorated'; @default 'decorated'. 'decorated' returns {@link Account}s with computed fields like `validator_status`. 'undecorated' returns {@link RawAccount}s with only the values stored in localStorage. 'raw' returns the unparsed string from localStorage.
  */
-export async function get(): Promise<Account[]> {
+export async function get(
+  style: 'raw' | 'undecorated' | 'decorated' = 'decorated'
+): Promise<Account[] | RawAccount[] | string> {
+  if (!['raw', 'undecorated', 'decorated'].includes(style)) {
+    throw new Error(
+      `Invalid argument to \`get\`; must be 'raw' | 'undecorated' | 'decorated'; got ${style}`
+    )
+  }
   await updateAccountsCache()
-  return accountsCache.decorated
-}
-
-/**
- * Get raw accounts, without computed values
- * @returns array of {@link RawAccount} objects
- */
-export async function getRaw(): Promise<RawAccount[]> {
-  await updateAccountsCache()
-  return accountsCache.parsed
+  return accountsCache[style]
 }
 
 /**
@@ -106,6 +107,7 @@ export async function getRaw(): Promise<RawAccount[]> {
  */
 export async function set(newAccounts: RawAccount[]) {
   localStorage.setItem('accounts', JSON.stringify(newAccounts));
+  await updateAccountsCache()
   await Promise.all(onChangeFns.map(fn => fn()))
 }
 
