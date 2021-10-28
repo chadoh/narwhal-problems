@@ -13,9 +13,14 @@ interface RawAccount {
 };
 
 type Account = RawAccount & {
+  lockup_info: {} | {
+    'Vesting Info': any;
+    'Termination Status': any;
+    'Liquid Balance': any;
+    'Locked Amount': number;
+  };
   current_balance?: number;
-  validator_status?: ValidatorStatus
-  vesting_info: any;
+  validator_status?: ValidatorStatus;
 }
 
 interface AccountsCache {
@@ -46,29 +51,40 @@ async function updateAccountsCache(): Promise<void> {
   accountsCache.raw = raw
   accountsCache.undecorated = JSON.parse(raw) as RawAccount[]
   accountsCache.decorated = await Promise.all(accountsCache.undecorated.map(
-    async (rawAccount: RawAccount) => {
-      // make copy of object, otherwise new array stores references to objects in old array
-      const account = {...rawAccount} as Account
-      if (account.delegated_to) {
-        account.current_balance = toNear(await view(
+    async (account: RawAccount): Promise<Account> => ({
+      ...account,
+      lockup_info: !account.lockup_contract ? {} : {
+        'Vesting Info': await view(
+          account.lockup_contract,
+          'get_vesting_information',
+        ),
+        'Termination Status': await view(
+          account.lockup_contract,
+          'get_termination_status',
+        ),
+        'Locked Amount': toNear(await view(
+          account.lockup_contract,
+          'get_locked_amount',
+        )),
+      },
+      ...(!account.delegated_to ? {} : {
+        validator_status: await getStatus(account.delegated_to),
+      }),
+      ...(!(account.delegated_to && account.lockup_contract) ? {} : {
+        current_balance: toNear(await view(
           account.delegated_to,
           'get_account_total_balance',
           { account_id: account.lockup_contract }
-        ))
-        account.validator_status = await getStatus(account.delegated_to)
-      }
-      if (account.lockup_contract) {
-        account.vesting_info = await view(account.lockup_contract, 'get_vesting_information')
-      }
-      return account
-    }
+        )),
+      })
+    })
   ))
 }
 
 /**
  * Get all accounts
  *
- * @param style 'raw' | 'undecorated' | 'decorated'; @default 'decorated'. 'decorated' returns {@link Account}s with computed fields like `validator_status`. 'undecorated' returns {@link RawAccount}s with only the values stored in localStorage. 'raw' returns the unparsed string from localStorage.
+ * @param style 'raw' | 'undecorated' | 'decorated'; @default 'decorated'. 'decorated' returns {@link Account}s with computed fields like `lockup_info`. 'undecorated' returns {@link RawAccount}s with only the values stored in localStorage. 'raw' returns the unparsed string from localStorage.
  */
 export async function get(
   style: 'raw' | 'undecorated' | 'decorated' = 'decorated'

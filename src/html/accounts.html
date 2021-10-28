@@ -503,7 +503,7 @@
         delegated_to, // possibly undefined
         validator_status, // possibly undefined
         hd_path, // possibly undefined
-        vesting_info, // possibly undefined
+        lockup_info,
         ...extra
       }) => (`
         <div
@@ -570,10 +570,10 @@
                 <label>Delegated to</label>
                 ${link(delegated_to)}
               </div>`}
-              ${!lockup_contract ? '' : `<div class="account__datum">
-                <label>Vesting Info</label>
-                <pre>${JSON.stringify(vesting_info)}</pre>
-              </div>`}
+              ${Object.entries(lockup_info).map(([key, value]) => `<div class="account__datum">
+                <label>${key}</label>
+                <pre>${JSON.stringify(value)}</pre>
+              </div>`).join('')}
               ${Object.entries(extra).map(([key, value]) => `<div class="account__datum">
                 <label>${key}</label>
                 <div class="ellipsis" title="${value}">${value}</div>

@@ -1,18 +1,36 @@
 <div id="aggregates" class="container"></div>
 
 <script>
-  window.renderers.push(async function renderAccounts({ accounts }) {
-    if (!accounts.length) return
+  const container = document.querySelector('#aggregates')
 
-    const container = document.querySelector('#aggregates')
-    if (!container) return
+  // cache old accounts to avoid pointless recalculation every render
+  let oldAccounts = null
 
-    const totalEarnings = accounts.reduce(
-      (sum, account) =>
-        sum + account.current_balance - account.starting_balance,
-      0
-    )
+  if (container) {
+    window.renderers.push(async function renderAccounts({ accounts }) {
+      if (!accounts.length) return
 
-    container.innerHTML = `<p style="text-align: center">Total Earnings: ${window.utils.formatLargeNum(totalEarnings)}</p>`
-  })
+      // can use simple equality check due to how accounts are cached
+      if (oldAccounts === accounts) return
+      oldAccounts = accounts
+
+      const totals = {
+        'Total Earnings': 0,
+        'Total Unlocked': 0,
+      }
+
+      accounts.forEach(account => {
+        totals['Total Earnings'] +=
+          account.current_balance - account.starting_balance
+        totals['Total Unlocked'] +=
+          account.current_balance - account.lockup_info['Locked Amount']
+      })
+
+      container.innerHTML = `<p style="text-align: center">${
+        Object.entries(totals).map(([label, value]) =>
+          `${label}: ${window.utils.formatLargeNum(value)}<br>`
+        ).join('')
+      }</p>`
+    })
+  }
 </script>
