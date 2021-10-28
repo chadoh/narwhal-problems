@@ -105,7 +105,7 @@
     p.innerHTML = `
       <span>
         <label for="extraKey${id}">Name</label>
-        <input id="extraKey${id}" name="extraKey${id}" autoComplete="off" value=${key}>
+        <input id="extraKey${id}" name="extraKey${id}" autoComplete="off" value="${key}">
       </span>
       <span>
         <label for="extraValue${id}">Value</label>
@@ -214,7 +214,7 @@
   async function getAccountFromUrl() {
     const matchData = window.location.hash.match(/#edit=(.*)/)
     const name = matchData && matchData[1]
-    return name && (await window.accounts.get()).find(a =>
+    return name && (await window.accounts.get('undecorated')).find(a =>
       a.account_name === name
     )
   }
