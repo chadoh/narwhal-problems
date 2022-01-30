@@ -346,7 +346,7 @@
         a => a.account_name === account_name
       )
       copy(
-        `export NEAR_ENV=mainnet\nexport ACCOUNT_NAME=${account_name}\n${
+        `export NEAR_ENV=mainnet\nexport ACCOUNT_NAME=${account_name}\nexport TOTAL_BALANCE=${account.current_balance}\n${
         account.lockup_contract ? `export LOCKUP_ID=${account.lockup_contract}` : ''}\n${
         account.delegated_to ? `export POOL_ID=${account.delegated_to}` : ''}\n${
         account.hd_path ? `export HD_PATH="${account.hd_path}"` : ''
@@ -503,7 +503,7 @@
     if (!status)
       return 'earn $NEAR, secure the network; <a target="_blank" href="https://docs.near.org/docs/validator/delegation">delegate</a>'
     if (status === 'active')
-      return `${window.utils.formatLargeNum(earnings)} $NEAR earned so far`
+      return `${window.utils.formatLargeNum(earnings, { convertYocto: false })} $NEAR earned so far`
     if (status === 'next')
       return 'validator <a target="_blank" href="https://explorer.near.org/nodes/validators">inactive</a>; active next epoch'
     if (status === 'proposed')
@@ -543,7 +543,7 @@
               <h2 class="account__location">${wallet_location}</h2>
               <div class="account__validator-status">
                 <span class="icon"></span>
-                <span>${displayValidatorStatus(validator_status, current_balance - starting_balance)
+                <span>${displayValidatorStatus(validator_status, window.utils.toNear(current_balance) - starting_balance)
         }</span>
               </div>
             </div>
@@ -581,7 +581,7 @@
               </div>`}
               <div class="account__datum">
                 <label>Starting Balance</label>
-                ${window.utils.formatLargeNum(starting_balance)}
+                ${window.utils.formatLargeNum(starting_balance, { convertYocto: false })}
               </div>
               <div class="account__datum">
                 <label>Current Balance</label>

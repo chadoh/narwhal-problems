@@ -1,4 +1,4 @@
-import { Near, keyStores } from 'near-api-js'
+import { Near, keyStores } from "near-api-js";
 
 export const near = new Near({
   keyStore: new keyStores.InMemoryKeyStore(),
@@ -6,7 +6,7 @@ export const near = new Near({
   networkId: process.env.NETWORK_ID,
   // @ts-expect-error
   nodeUrl: process.env.NODE_URL,
-})
+});
 
 /**
  * Make a view call to a NEAR smart contract.
@@ -21,6 +21,6 @@ export const view = async (
   method: string,
   args: Record<string, any> = {}
 ): Promise<any> => {
-  const account = await near.account(contract)
-  return account.viewFunction(contract, method, args)
-}
+  const account = await near.account(contract);
+  return account.viewFunction(contract, method, args);
+};

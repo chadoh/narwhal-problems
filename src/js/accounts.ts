@@ -33,10 +33,6 @@ interface AccountsCache {
   decorated: Account[];
 }
 
-function toNear(yoctoNear: number | string): number {
-  return Number(yoctoNear) / 1e24;
-}
-
 const onChangeFns: (() => {})[] = [];
 
 const accountsCache: AccountsCache = {
@@ -69,20 +65,21 @@ async function updateAccountsCache(): Promise<void> {
                 account.lockup_contract,
                 "get_termination_status"
               ),
-              "Liquid Balance": toNear(
-                await view(account.lockup_contract, "get_liquid_owners_balance")
+              "Liquid Balance": await view(
+                account.lockup_contract,
+                "get_liquid_owners_balance"
               ),
-              "Locked Amount": toNear(
-                await view(account.lockup_contract, "get_locked_amount")
+              "Locked Amount": await view(
+                account.lockup_contract,
+                "get_locked_amount"
               ),
-              "Owners Balance": toNear(
-                await view(account.lockup_contract, "get_owners_balance")
+              "Owners Balance": await view(
+                account.lockup_contract,
+                "get_owners_balance"
               ),
-              "Terminated Unvested Balance": toNear(
-                await view(
-                  account.lockup_contract,
-                  "get_terminated_unvested_balance"
-                )
+              "Terminated Unvested Balance": await view(
+                account.lockup_contract,
+                "get_terminated_unvested_balance"
               ),
             },
         ...(!account.delegated_to
@@ -90,13 +87,12 @@ async function updateAccountsCache(): Promise<void> {
           : {
               validator_status: await getStatus(account.delegated_to),
             }),
-        ...(!(account.delegated_to && account.lockup_contract)
+        ...(!account.lockup_contract
           ? {}
           : {
-              current_balance: toNear(
-                await view(account.delegated_to, "get_account_total_balance", {
-                  account_id: account.lockup_contract,
-                })
+              current_balance: await view(
+                account.lockup_contract,
+                "get_balance"
               ),
             }),
       })
