@@ -327,9 +327,30 @@
   // tracks UI state for which accounts have "view details" open
   const openAccountDetails = {};
 
+  function copy(text) {
+    var input = document.createElement('textarea');
+    input.innerHTML = text;
+    document.body.appendChild(input);
+    input.select();
+    var result = document.execCommand('copy');
+    document.body.removeChild(input);
+    return result;
+  }
+
   const accountActions = {
     'Edit': account_name => {
       window.location.hash = `#edit=${account_name}`
+    },
+    'Copy bash variables': async account_name => {
+      const account = (await window.accounts.get()).find(
+        a => a.account_name === account_name
+      )
+      copy(
+        `export NEAR_ENV=mainnet\nexport ACCOUNT_NAME=${account_name}\n${
+        account.lockup_contract ? `export LOCKUP_ID=${account.lockup_contract}` : ''}\n${
+        account.delegated_to ? `export POOL_ID=${account.delegated_to}` : ''}\n${
+        account.hd_path ? `export HD_PATH="${account.hd_path}"` : ''
+      }`)
     },
     'Delete': async account_name => {
       if (confirm("Are you sure? This can't be undone.")) {
