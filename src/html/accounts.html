@@ -346,7 +346,7 @@
         a => a.account_name === account_name
       )
       copy(
-        `export NEAR_ENV=mainnet\nexport ACCOUNT_NAME=${account_name}\nexport TOTAL_BALANCE=${account.current_balance}\n${
+        `export NEAR_ENV=mainnet\nexport ACCOUNT_ID=${account_name}\nexport TOTAL_BALANCE=${account.current_balance}\n${
         account.lockup_contract ? `export LOCKUP_ID=${account.lockup_contract}` : ''}\n${
         account.delegated_to ? `export POOL_ID=${account.delegated_to}` : ''}\n${
         account.hd_path ? `export HD_PATH="${account.hd_path}"` : ''
