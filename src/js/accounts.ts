@@ -1,3 +1,4 @@
+import { toNear } from "./utils";
 import { view } from "./near";
 import { getStatus, ValidatorStatus } from "./validators";
 
@@ -65,21 +66,20 @@ async function updateAccountsCache(): Promise<void> {
                 account.lockup_contract,
                 "get_termination_status"
               ),
-              "Liquid Balance": await view(
-                account.lockup_contract,
-                "get_liquid_owners_balance"
+              "Liquid Balance": toNear(
+                await view(account.lockup_contract, "get_liquid_owners_balance")
               ),
-              "Locked Amount": await view(
-                account.lockup_contract,
-                "get_locked_amount"
+              "Locked Amount": toNear(
+                await view(account.lockup_contract, "get_locked_amount")
               ),
-              "Owners Balance": await view(
-                account.lockup_contract,
-                "get_owners_balance"
+              "Owners Balance": toNear(
+                await view(account.lockup_contract, "get_owners_balance")
               ),
-              "Terminated Unvested Balance": await view(
-                account.lockup_contract,
-                "get_terminated_unvested_balance"
+              "Terminated Unvested Balance": toNear(
+                await view(
+                  account.lockup_contract,
+                  "get_terminated_unvested_balance"
+                )
               ),
             },
         ...(!account.delegated_to
