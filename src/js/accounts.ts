@@ -24,7 +24,8 @@ type Account = RawAccount & {
         "Owner's Balance": number;
         "Terminated Unvested Balance": number;
       };
-  current_balance?: number;
+  lockup_balance?: number;
+  staked_balance?: number;
   validator_status?: ValidatorStatus;
 };
 
@@ -72,7 +73,7 @@ async function updateAccountsCache(): Promise<void> {
               "Locked Amount": toNear(
                 await view(account.lockup_contract, "get_locked_amount")
               ),
-              "Owners Balance": toNear(
+              "Owner's Balance": toNear(
                 await view(account.lockup_contract, "get_owners_balance")
               ),
               "Terminated Unvested Balance": toNear(
@@ -90,9 +91,20 @@ async function updateAccountsCache(): Promise<void> {
         ...(!account.lockup_contract
           ? {}
           : {
-              current_balance: await view(
+              lockup_balance: await view(
                 account.lockup_contract,
                 "get_balance"
+              ),
+            }),
+        ...(!(account.delegated_to && account.lockup_contract)
+          ? {}
+          : {
+              staked_balance: await view(
+                account.delegated_to,
+                "get_account_total_balance",
+                {
+                  account_id: account.lockup_contract,
+                }
               ),
             }),
       })

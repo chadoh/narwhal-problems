@@ -15,20 +15,25 @@
       oldAccounts = accounts
 
       const totals = {
-        'Total Earnings': 0,
         'Total Unlocked': 0,
+        'Total Locked': 0,
+        'Total Unclaimed Earnings': 0,
+        'Grand Total': 0,
       }
 
       accounts.forEach(account => {
-        totals['Total Earnings'] +=
-          account.current_balance - account.starting_balance
-        totals['Total Unlocked'] +=
-          account.current_balance - account.lockup_info['Locked Amount']
+        totals['Total Unlocked'] += account.lockup_info["Owner's Balance"]
+        totals['Total Locked'] += account.lockup_info['Locked Amount']
+        totals['Total Unclaimed Earnings'] += window.utils.toNear(account.staked_balance - account.lockup_balance)
+        totals['Grand Total'] +=
+          account.lockup_info["Owner's Balance"] +
+          account.lockup_info['Locked Amount'] +
+          window.utils.toNear(account.staked_balance - account.lockup_balance)
       })
 
       container.innerHTML = `<p style="text-align: center">${
         Object.entries(totals).map(([label, value]) =>
-          `${label}: ${window.utils.formatLargeNum(value)}<br>`
+          `${label}: ${window.utils.formatLargeNum(value, { convertYocto: false })}<br>`
         ).join('')
       }</p>`
     })

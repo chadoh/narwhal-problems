@@ -523,7 +523,8 @@
         public_key, // possibly undefined
         account_name,
         starting_balance,
-        current_balance,
+        lockup_balance,
+        staked_balance,
         lockup_contract,
         delegated_to, // possibly undefined
         validator_status, // possibly undefined
@@ -543,8 +544,14 @@
               <h2 class="account__location">${wallet_location}</h2>
               <div class="account__validator-status">
                 <span class="icon"></span>
-                <span>${displayValidatorStatus(validator_status, window.utils.toNear(current_balance) - starting_balance)
-        }</span>
+                <span>${displayValidatorStatus(
+                  validator_status,
+                  window.utils.formatLargeNum(
+                    staked_balance && lockup_balance
+                      ? (staked_balance - lockup_balance)
+                      : lockup_balance
+                  )
+                )}</span>
               </div>
             </div>
             <div class="account__actions">
@@ -579,14 +586,6 @@
                 <label>HD Path</label>
                 ${hd_path}
               </div>`}
-              <div class="account__datum">
-                <label>Starting Balance</label>
-                ${window.utils.formatLargeNum(starting_balance, { convertYocto: false })}
-              </div>
-              <div class="account__datum">
-                <label>Current Balance</label>
-                ${window.utils.formatLargeNum(current_balance)}
-              </div>
               ${!lockup_contract ? '' : `<div class="account__datum">
                 <label>Lockup Contract</label>
                 ${link(lockup_contract)}
@@ -594,6 +593,18 @@
               ${!delegated_to ? '' : `<div class="account__datum">
                 <label>Delegated to</label>
                 ${link(delegated_to)}
+              </div>`}
+              <div class="account__datum">
+                <label><abbr title="\`current_balance\` from Lockup Contract">Lockup Balance</abbr></label>
+                ${window.utils.formatLargeNum(lockup_balance)}
+              </div>
+              ${!delegated_to ? '' : `<div class="account__datum">
+                <label><abbr title="\`get_account_total_balance\` from the staking pool (${delegated_to})">Staking Pool Balance</abbr></label>
+                ${window.utils.formatLargeNum(staked_balance)}
+              </div>`}
+              ${!delegated_to ? '' : `<div class="account__datum">
+                <label><abbr title="Staking Pool Balance minus Lockup Balance">Unclaimed Earnings</abbr></label>
+                ${window.utils.formatLargeNum(staked_balance - lockup_balance)}
               </div>`}
               ${Object.entries(lockup_info).map(([key, value]) => `<div class="account__datum">
                 <label>${key}</label>
