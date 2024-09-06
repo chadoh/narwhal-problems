@@ -1,11 +1,15 @@
+window.global ||= window;
+import { Buffer } from "buffer/";
+(window as any).Buffer = Buffer;
+
 import { Near, keyStores } from "near-api-js";
 
 export const near = new Near({
   keyStore: new keyStores.InMemoryKeyStore(),
-  // @ts-expect-error
-  networkId: process.env.NETWORK_ID,
-  // @ts-expect-error
-  nodeUrl: process.env.NODE_URL,
+  networkId: import.meta.env.PUBLIC_NETWORK_ID,
+  nodeUrl: import.meta.env.PUBLIC_NODE_URL,
+  walletUrl: import.meta.env.PUBLIC_WALLET_URL,
+  helperUrl: import.meta.env.PUBLIC_HELPER_URL,
 });
 
 /**
@@ -19,8 +23,12 @@ export const near = new Near({
 export const view = async (
   contract: string,
   method: string,
-  args: Record<string, any> = {}
+  args: Record<string, any> = {},
 ): Promise<any> => {
   const account = await near.account(contract);
-  return account.viewFunction(contract, method, args);
+  return account.viewFunction({
+    contractId: contract,
+    methodName: method,
+    args,
+  });
 };

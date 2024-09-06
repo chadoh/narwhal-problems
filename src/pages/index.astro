@@ -1,0 +1,22 @@
+---
+import AccountModal from '../components/account-modal.astro';
+import Accounts from '../components/accounts.astro';
+import Aggregates from '../components/aggregates.astro';
+import ExportImport from '../components/ExportImport.astro';
+import Intro from '../components/intro.astro';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+  <h1 style="text-align: center">🐳 Narwhal Problems 💰</h1>
+  <Intro />
+  <Aggregates />
+  <Accounts />
+  <ExportImport />
+  <AccountModal />
+  <script is:inline>
+  window.onload = () => {
+    window.render()
+  }
+  </script>
+</Layout>

@@ -1,19 +1,20 @@
 import { toNear } from "./utils";
-import { view } from "./near";
-import { getStatus, ValidatorStatus } from "./validators";
+import { near, view } from "./near";
+import { getStatus } from "./validators";
+import type { ValidatorStatus } from "./validators";
 
 // accounts as they exist in local storage
-interface RawAccount {
+export interface RawAccount {
   wallet_location: string;
   public_key?: string;
   account_name: string;
   hd_path?: string;
   starting_balance: number;
-  lockup_contract: string;
+  lockup_contract?: string;
   delegated_to?: string;
 }
 
-type Account = RawAccount & {
+export type Account = RawAccount & {
   lockup_info:
     | {}
     | {
@@ -43,6 +44,8 @@ const accountsCache: AccountsCache = {
   decorated: [],
 };
 
+const doesntExist = /doesn't exist/;
+
 async function updateAccountsCache(): Promise<void> {
   const raw = localStorage.getItem("accounts");
 
@@ -54,61 +57,77 @@ async function updateAccountsCache(): Promise<void> {
   accountsCache.undecorated = JSON.parse(raw) as RawAccount[];
   accountsCache.decorated = await Promise.all(
     accountsCache.undecorated.map(
-      async (account: RawAccount): Promise<Account> => ({
-        ...account,
-        lockup_info: !account.lockup_contract
-          ? {}
-          : {
-              "Vesting Info": await view(
-                account.lockup_contract,
-                "get_vesting_information"
-              ),
-              "Termination Status": await view(
-                account.lockup_contract,
-                "get_termination_status"
-              ),
-              "Liquid Balance": toNear(
-                await view(account.lockup_contract, "get_liquid_owners_balance")
-              ),
-              "Locked Amount": toNear(
-                await view(account.lockup_contract, "get_locked_amount")
-              ),
-              "Owner's Balance": toNear(
-                await view(account.lockup_contract, "get_owners_balance")
-              ),
-              "Terminated Unvested Balance": toNear(
-                await view(
-                  account.lockup_contract,
-                  "get_terminated_unvested_balance"
-                )
-              ),
-            },
-        ...(!account.delegated_to
-          ? {}
-          : {
-              validator_status: await getStatus(account.delegated_to),
-            }),
-        ...(!account.lockup_contract
-          ? {}
-          : {
-              lockup_balance: await view(
-                account.lockup_contract,
-                "get_balance"
-              ),
-            }),
-        ...(!(account.delegated_to && account.lockup_contract)
-          ? {}
-          : {
-              staked_balance: await view(
-                account.delegated_to,
-                "get_account_total_balance",
-                {
-                  account_id: account.lockup_contract,
-                }
-              ),
-            }),
-      })
-    )
+      async (account: RawAccount): Promise<Account> => {
+        // if "lockup_contract" is in the JSON, but the contract has been deleted
+        if (account.lockup_contract) {
+          const lockup = await near.account(account.lockup_contract);
+          try {
+            await lockup.getAccountBalance();
+          } catch (e) {
+            if (e instanceof Error && doesntExist.test(e.message))
+              account.lockup_contract = "DELETED";
+          }
+        }
+        return {
+          ...account,
+          lockup_info:
+            !account.lockup_contract || account.lockup_contract === "DELETED"
+              ? {}
+              : {
+                  "Vesting Info": await view(
+                    account.lockup_contract,
+                    "get_vesting_information",
+                  ),
+                  "Termination Status": await view(
+                    account.lockup_contract,
+                    "get_termination_status",
+                  ),
+                  "Liquid Balance": toNear(
+                    await view(
+                      account.lockup_contract,
+                      "get_liquid_owners_balance",
+                    ),
+                  ),
+                  "Locked Amount": toNear(
+                    await view(account.lockup_contract, "get_locked_amount"),
+                  ),
+                  "Owner's Balance": toNear(
+                    await view(account.lockup_contract, "get_owners_balance"),
+                  ),
+                  "Terminated Unvested Balance": toNear(
+                    await view(
+                      account.lockup_contract,
+                      "get_terminated_unvested_balance",
+                    ),
+                  ),
+                  lockup_balance: await view(
+                    account.lockup_contract,
+                    "get_balance",
+                  ),
+                },
+          ...(!account.delegated_to
+            ? {}
+            : {
+                validator_status: await getStatus(account.delegated_to),
+              }),
+          ...(!(
+            account.delegated_to &&
+            account.lockup_contract &&
+            account.lockup_contract !== "DELETED"
+          )
+            ? {}
+            : {
+                staked_balance: await view(
+                  account.delegated_to,
+                  "get_account_total_balance",
+                  {
+                    account_id: account.lockup_contract,
+                  },
+                ),
+              }),
+        };
+      },
+    ),
   );
 }
 
@@ -117,12 +136,16 @@ async function updateAccountsCache(): Promise<void> {
  *
  * @param style 'raw' | 'undecorated' | 'decorated'; @default 'decorated'. 'decorated' returns {@link Account}s with computed fields like `lockup_info`. 'undecorated' returns {@link RawAccount}s with only the values stored in localStorage. 'raw' returns the unparsed string from localStorage.
  */
+export async function get(style: "raw"): Promise<string>;
+export async function get(style: "undecorated"): Promise<RawAccount[]>;
+export async function get(style: "decorated"): Promise<Account[]>;
+export async function get(): Promise<Account[]>;
 export async function get(
-  style: "raw" | "undecorated" | "decorated" = "decorated"
+  style: "raw" | "undecorated" | "decorated" = "decorated",
 ): Promise<Account[] | RawAccount[] | string> {
   if (!["raw", "undecorated", "decorated"].includes(style)) {
     throw new Error(
-      `Invalid argument to \`get\`; must be 'raw' | 'undecorated' | 'decorated'; got ${style}`
+      `Invalid argument to \`get\`; must be 'raw' | 'undecorated' | 'decorated'; got ${style}`,
     );
   }
   await updateAccountsCache();

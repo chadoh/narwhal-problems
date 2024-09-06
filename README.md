@@ -22,29 +22,19 @@ This app is for you!
 Run it locally
 ==============
 
-* Make sure you have [Node.js] and the latest [yarn] installed
+* Make sure you have [Node.js]
 * Clone the code
 * `cd` into the repo
-
-This project uses [Yarn 2](https://yarnpkg.com/getting-started/migration) in [Zero-Install mode](https://yarnpkg.com/features/zero-installs) so you shouldn't have to run `yarn install` when you first clone this repository.
-
-If you use an editor other than VS Code or vim to work on this codebase, you may want to add Yarn 2 editor support to your local project [using `yarn dlx @yarnpkg/pnpify --sdk`](https://yarnpkg.com/getting-started/editor-sdks). Settings for VS Code & vim are checked into the repo.
-
-Now you should be able to run project scripts:
-
-* `yarn start`
-
-You should also see eslint & TypeScript support in your editor.
+* `npm i`
+* `npm run dev`
 
   [Node.js]: https://nodejs.org/en/download/package-manager/
-  [yarn]: https://yarnpkg.com/
 
 
 
 Bonus Features For People Running It Locally
 ============================================
 
-This project has a couple files in `gitignore` for you. This means if you create these files, you won't accidentally commit them to the codebase.
-
-* `accounts.js` – go ahead and copy the data from the app into this file for a less-transient way to store it
+This project has a couple files in `gitignore` for you. This means if you create these files, you won't accidentally commit them to the codebase
+* `accounts.json` – go ahead and copy the data from the app into this file for a less-transient way to store it
 * `picking-validators.md` – you can use this file as a handy personal notepad when figuring out which validators to delegate to

@@ -9,7 +9,7 @@ export default async function render() {
 
   // avoid race conditions in multiple calls to `getAccounts` by calling once
   // then passing result to all renderers
-  return Promise.all((window as any).renderers.map(fn => fn({
+  return Promise.all(window.renderers.map(fn => fn({
     accounts, accountsRaw, setAccounts
   })))
 }

@@ -1,13 +1,24 @@
-accounts.js
-dist
-node_modules
-.parcel-cache
-picking-validators.md
+# build output
+dist/
 
-# Yarn 2
-.yarn/*
-!.yarn/cache/
-!.yarn/releases/
-!.yarn/plugins/
-!.yarn/versions/
-!.yarn/sdks/
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# macOS-specific files
+.DS_Store
+
+# jetbrains setting folder
+.idea/
+
+# narwhal problems
+accounts.json
+picking-validators.md

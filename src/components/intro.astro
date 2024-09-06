@@ -1,0 +1,28 @@
+<div id="intro" class="container">
+  <p>An app for helping NEAR Whales (narwhals) carry their heavy bags of tokens. Poor narwhals!</p>
+
+  <h1>Are you a narwhal, too?</h1>
+
+  <p>Do you have several buckets full of NEAR tokens?</p>
+
+  <p>Spread across many hardware wallets?</p>
+
+  <p>Locked in lockup contracts?</p>
+
+  <p>Do you already have trouble tracking all that, then also need to keep tabs on validators, your total liquid
+    balance, etc?</p>
+
+  <p>This app is for you!</p>
+
+  <p>Click "Add Account" to start making your own Narwhal Dashboard.</p>
+</div>
+
+<script>
+  window.renderers.push(async function renderIntro({ accounts }) {
+    if (accounts.length) {
+      (document.querySelector('#intro') as HTMLElement).style.display = 'none'
+    } else {
+      (document.querySelector('#intro') as HTMLElement).style.display = 'block'
+    }
+  })
+</script>
