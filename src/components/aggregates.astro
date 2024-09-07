@@ -2,6 +2,7 @@
 
 <script>
   import type { Account } from "../js/accounts";
+  import { toNear } from "../js/utils";
   const container = document.querySelector("#aggregates");
 
   // cache old accounts to avoid pointless recalculation every render
@@ -23,15 +24,18 @@
       };
 
       accounts.forEach((account) => {
-        totals["Total Unlocked"] += account.lockup_info["Owner's Balance"];
+        totals["Total Unlocked"] +=
+          toNear(account.native_balance) +
+          account.lockup_info["Owner's Balance"];
         totals["Total Locked"] += account.lockup_info["Locked Amount"];
-        totals["Total Unclaimed Earnings"] += window.utils.toNear(
+        totals["Total Unclaimed Earnings"] += toNear(
           account.staked_balance - account.lockup_balance,
         );
         totals["Grand Total"] +=
+          toNear(account.native_balance) +
           account.lockup_info["Owner's Balance"] +
           account.lockup_info["Locked Amount"] +
-          window.utils.toNear(account.staked_balance - account.lockup_balance);
+          toNear(account.staked_balance - account.lockup_balance);
       });
 
       container.innerHTML = `<p style="text-align: center">${Object.entries(
