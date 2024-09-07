@@ -1,41 +1,47 @@
 <div id="aggregates" class="container"></div>
 
 <script>
-  const container = document.querySelector('#aggregates')
+  import type { Account } from "../js/accounts";
+  const container = document.querySelector("#aggregates");
 
   // cache old accounts to avoid pointless recalculation every render
-  let oldAccounts = null
+  let oldAccounts: Account[] = null;
 
   if (container) {
     window.renderers.push(async function renderAccounts({ accounts }) {
-      if (!accounts.length) return
+      if (!accounts.length) return;
 
       // can use simple equality check due to how accounts are cached
-      if (oldAccounts === accounts) return
-      oldAccounts = accounts
+      if (oldAccounts === accounts) return;
+      oldAccounts = accounts;
 
       const totals = {
-        'Total Unlocked': 0,
-        'Total Locked': 0,
-        'Total Unclaimed Earnings': 0,
-        'Grand Total': 0,
-      }
+        "Total Unlocked": 0,
+        "Total Locked": 0,
+        "Total Unclaimed Earnings": 0,
+        "Grand Total": 0,
+      };
 
-      accounts.forEach(account => {
-        totals['Total Unlocked'] += account.lockup_info["Owner's Balance"]
-        totals['Total Locked'] += account.lockup_info['Locked Amount']
-        totals['Total Unclaimed Earnings'] += window.utils.toNear(account.staked_balance - account.lockup_balance)
-        totals['Grand Total'] +=
+      accounts.forEach((account) => {
+        totals["Total Unlocked"] += account.lockup_info["Owner's Balance"];
+        totals["Total Locked"] += account.lockup_info["Locked Amount"];
+        totals["Total Unclaimed Earnings"] += window.utils.toNear(
+          account.staked_balance - account.lockup_balance,
+        );
+        totals["Grand Total"] +=
           account.lockup_info["Owner's Balance"] +
-          account.lockup_info['Locked Amount'] +
-          window.utils.toNear(account.staked_balance - account.lockup_balance)
-      })
+          account.lockup_info["Locked Amount"] +
+          window.utils.toNear(account.staked_balance - account.lockup_balance);
+      });
 
-      container.innerHTML = `<p style="text-align: center">${
-        Object.entries(totals).map(([label, value]) =>
-          `${label}: ${window.utils.formatLargeNum(value, { convertYocto: false })}<br>`
-        ).join('')
-      }</p>`
-    })
+      container.innerHTML = `<p style="text-align: center">${Object.entries(
+        totals,
+      )
+        .map(
+          ([label, value]) =>
+            `${label}: ${window.utils.formatLargeNum(value, { convertYocto: false })}<br>`,
+        )
+        .join("")}</p>`;
+    });
   }
 </script>

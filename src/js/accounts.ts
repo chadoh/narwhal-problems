@@ -15,19 +15,18 @@ export interface RawAccount {
 }
 
 export type Account = RawAccount & {
-  lockup_info:
-    | {}
-    | {
-        "Vesting Info": any;
-        "Termination Status": any;
-        "Liquid Balance": any;
-        "Locked Amount": number;
-        "Owner's Balance": number;
-        "Terminated Unvested Balance": number;
-      };
-  lockup_balance?: number;
-  staked_balance?: number;
+  lockup_info: {
+    "Vesting Info": any;
+    "Termination Status": any;
+    "Liquid Balance": any;
+    "Locked Amount": number;
+    "Owner's Balance": number;
+    "Terminated Unvested Balance": number;
+  };
+  lockup_balance: number;
+  staked_balance: number;
   validator_status?: ValidatorStatus;
+  native_balance: number;
 };
 
 interface AccountsCache {
@@ -58,6 +57,7 @@ async function updateAccountsCache(): Promise<void> {
   accountsCache.decorated = await Promise.all(
     accountsCache.undecorated.map(
       async (account: RawAccount): Promise<Account> => {
+        const nearAccount = await near.account(account.account_name);
         // if "lockup_contract" is in the JSON, but the contract has been deleted
         if (account.lockup_contract) {
           const lockup = await near.account(account.lockup_contract);
@@ -70,10 +70,26 @@ async function updateAccountsCache(): Promise<void> {
         }
         return {
           ...account,
-          lockup_info:
-            !account.lockup_contract || account.lockup_contract === "DELETED"
-              ? {}
-              : {
+          native_balance: Number(
+            (await nearAccount.getAccountBalance()).available,
+          ),
+          ...(!account.lockup_contract || account.lockup_contract === "DELETED"
+            ? {
+                lockup_balance: 0,
+                lockup_info: {
+                  "Vesting Info": "None",
+                  "Termination Status": null,
+                  "Liquid Balance": 0,
+                  "Locked Amount": 0,
+                  "Owner's Balance": 0,
+                  "Terminated Unvested Balance": 0,
+                },
+              }
+            : {
+                lockup_balance: Number(
+                  await view(account.lockup_contract, "get_balance"),
+                ),
+                lockup_info: {
                   "Vesting Info": await view(
                     account.lockup_contract,
                     "get_vesting_information",
@@ -100,11 +116,8 @@ async function updateAccountsCache(): Promise<void> {
                       "get_terminated_unvested_balance",
                     ),
                   ),
-                  lockup_balance: await view(
-                    account.lockup_contract,
-                    "get_balance",
-                  ),
                 },
+              }),
           ...(!account.delegated_to
             ? {}
             : {
@@ -115,14 +128,16 @@ async function updateAccountsCache(): Promise<void> {
             account.lockup_contract &&
             account.lockup_contract !== "DELETED"
           )
-            ? {}
+            ? { staked_balance: 0 }
             : {
-                staked_balance: await view(
-                  account.delegated_to,
-                  "get_account_total_balance",
-                  {
-                    account_id: account.lockup_contract,
-                  },
+                staked_balance: Number(
+                  await view(
+                    account.delegated_to,
+                    "get_account_total_balance",
+                    {
+                      account_id: account.lockup_contract,
+                    },
+                  ),
                 ),
               }),
         };

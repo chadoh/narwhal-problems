@@ -322,6 +322,7 @@
 </style>
 
 <script>
+  import type { ValidatorStatus } from "./validators";
   // tracks UI state for which accounts have "view details" open
   const openAccountDetails = {};
 
@@ -509,11 +510,11 @@
     </a>
   `;
 
-  function displayValidatorStatus(status, earnings) {
+  function displayValidatorStatus(status: ValidatorStatus, earnings: number) {
     if (!status)
       return 'earn $NEAR, secure the network; <a target="_blank" href="https://docs.near.org/docs/validator/delegation">delegate</a>';
     if (status === "active")
-      return `${window.utils.formatLargeNum(earnings, { convertYocto: false })} $NEAR earned so far`;
+      return `${window.utils.formatLargeNum(earnings)} $NEAR earned so far`;
     if (status === "next")
       return 'validator <a target="_blank" href="https://explorer.near.org/nodes/validators">inactive</a>; active next epoch';
     if (status === "proposed")
@@ -533,7 +534,7 @@
           wallet_location,
           public_key, // possibly undefined
           account_name,
-          starting_balance,
+          native_balance,
           lockup_balance,
           staked_balance,
           lockup_contract,
@@ -556,11 +557,10 @@
                 <span class="icon"></span>
                 <span>${displayValidatorStatus(
                   validator_status,
-                  window.utils.formatLargeNum(
-                    staked_balance && lockup_balance
+                  native_balance +
+                    (staked_balance && lockup_balance
                       ? staked_balance - lockup_balance
-                      : lockup_balance,
-                  ),
+                      : lockup_balance),
                 )}</span>
               </div>
             </div>
@@ -621,6 +621,10 @@
                 ${link(delegated_to)}
               </div>`
               }
+              <div class="account__datum">
+                <label>Native Balance</label>
+                ${window.utils.formatLargeNum(native_balance)}
+              </div>
               <div class="account__datum">
                 <label><abbr title="\`get_balance\` from Lockup Contract">Lockup Balance</abbr></label>
                 ${window.utils.formatLargeNum(lockup_balance)}
