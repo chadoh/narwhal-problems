@@ -123,23 +123,19 @@ async function updateAccountsCache(): Promise<void> {
             : {
                 validator_status: await getStatus(account.delegated_to),
               }),
-          ...(!(
-            account.delegated_to &&
-            account.lockup_contract &&
-            account.lockup_contract !== "DELETED"
-          )
-            ? { staked_balance: 0 }
-            : {
-                staked_balance: Number(
-                  await view(
-                    account.delegated_to,
-                    "get_account_total_balance",
-                    {
-                      account_id: account.lockup_contract,
-                    },
-                  ),
+          ...(!account.delegated_to ? { staked_balance: 0 } : {
+              staked_balance: Number(
+                await view(
+                  account.delegated_to,
+                  "get_account_total_balance",
+                  {
+                    account_id: account.lockup_contract !== "DELETED"
+                    ? account.lockup_contract
+                    : account.account_name,
+                  },
                 ),
-              }),
+              ),
+            }),
         };
       },
     ),

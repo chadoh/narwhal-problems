@@ -17,33 +17,25 @@
       oldAccounts = accounts;
 
       const totals = {
-        "Total Unlocked": 0,
         "Total Locked": 0,
-        "Total Unclaimed Earnings": 0,
         "Grand Total": 0,
       };
 
       accounts.forEach((account) => {
-        totals["Total Unlocked"] +=
-          toNear(account.native_balance) +
-          account.lockup_info["Owner's Balance"];
         totals["Total Locked"] += account.lockup_info["Locked Amount"];
-        totals["Total Unclaimed Earnings"] += toNear(
-          account.staked_balance - account.lockup_balance,
-        );
         totals["Grand Total"] +=
           toNear(account.native_balance) +
           account.lockup_info["Owner's Balance"] +
           account.lockup_info["Locked Amount"] +
-          toNear(account.staked_balance - account.lockup_balance);
+          toNear(account.staked_balance);
       });
 
       container.innerHTML = `<p style="text-align: center">${Object.entries(
-        totals,
+        totals
       )
         .map(
           ([label, value]) =>
-            `${label}: ${window.utils.formatLargeNum(value, { convertYocto: false })}<br>`,
+            `${label}: ${window.utils.formatLargeNum(value, { convertYocto: false })}<br>`
         )
         .join("")}</p>`;
     });
