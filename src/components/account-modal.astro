@@ -228,7 +228,7 @@
       });
 
     // strip out unfilled fields
-    for (key in data) {
+    for (let key in data) {
       if (!data[key]) delete data[key];
     }
 
@@ -278,7 +278,7 @@
     // only want to fill in extra fields when form is first shown
     const extraFieldsInitialized = extraFieldsDiv.dataset.initialized;
 
-    for (key in data) {
+    for (let key in data) {
       if (form.elements[key]) {
         form.elements[key].value = data[key];
       } else if (!extraFieldsInitialized) {
