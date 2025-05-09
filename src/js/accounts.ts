@@ -25,6 +25,7 @@ export type Account = RawAccount & {
   };
   lockup_balance: number;
   staked_balance: number;
+  unstaked_balance: number;
   validator_status?: ValidatorStatus;
   native_balance: number;
 };
@@ -123,11 +124,25 @@ async function updateAccountsCache(): Promise<void> {
             : {
                 validator_status: await getStatus(account.delegated_to),
               }),
-          ...(!account.delegated_to ? { staked_balance: 0 } : {
+          ...(!account.delegated_to ? {
+            staked_balance: 0,
+            unstaked_balance: 0,
+          } : {
               staked_balance: Number(
                 await view(
                   account.delegated_to,
-                  "get_account_total_balance",
+                  "get_account_staked_balance",
+                  {
+                    account_id: account.lockup_contract !== "DELETED"
+                    ? account.lockup_contract
+                    : account.account_name,
+                  },
+                ),
+              ),
+              unstaked_balance: Number(
+                await view(
+                  account.delegated_to,
+                  "get_account_unstaked_balance",
                   {
                     account_id: account.lockup_contract !== "DELETED"
                     ? account.lockup_contract

@@ -27,15 +27,16 @@
           toNear(account.native_balance) +
           account.lockup_info["Owner's Balance"] +
           account.lockup_info["Locked Amount"] +
-          toNear(account.staked_balance);
+          toNear(account.staked_balance) +
+          toNear(account.unstaked_balance);
       });
 
       container.innerHTML = `<p style="text-align: center">${Object.entries(
-        totals
+        totals,
       )
         .map(
           ([label, value]) =>
-            `${label}: ${window.utils.formatLargeNum(value, { convertYocto: false })}<br>`
+            `${label}: ${window.utils.formatLargeNum(value, { convertYocto: false })}<br>`,
         )
         .join("")}</p>`;
     });

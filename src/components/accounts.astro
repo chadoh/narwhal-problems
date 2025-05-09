@@ -514,7 +514,7 @@
     if (!status)
       return 'earn $NEAR, secure the network; <a target="_blank" href="https://docs.near.org/docs/validator/delegation">delegate</a>';
     if (status === "active")
-      return `${window.utils.formatLargeNum(earnings)} $NEAR earned so far`;
+      return `${window.utils.formatLargeNum(earnings)} Ⓝ`;
     if (status === "next")
       return 'validator <a target="_blank" href="https://explorer.near.org/nodes/validators">inactive</a>; active next epoch';
     if (status === "proposed")
@@ -537,6 +537,7 @@
           native_balance,
           lockup_balance,
           staked_balance,
+          unstaked_balance,
           lockup_contract,
           delegated_to, // possibly undefined
           validator_status, // possibly undefined
@@ -559,8 +560,10 @@
                   validator_status,
                   native_balance +
                     (staked_balance && lockup_balance
-                      ? staked_balance - lockup_balance
-                      : lockup_balance),
+                      ? staked_balance + unstaked_balance - lockup_balance
+                      : staked_balance
+                        ? staked_balance + unstaked_balance
+                        : lockup_balance),
                 )}</span>
               </div>
             </div>
@@ -633,8 +636,16 @@
                 !delegated_to
                   ? ""
                   : `<div class="account__datum">
-                <label><abbr title="\`get_account_total_balance\` from the staking pool (${delegated_to})">Staking Pool Balance</abbr></label>
+                <label><abbr title="\`get_account_staked_balance\` from the staking pool (${delegated_to})">Staking Pool Staked Balance</abbr></label>
                 ${window.utils.formatLargeNum(staked_balance)}
+              </div>`
+              }
+              ${
+                !delegated_to
+                  ? ""
+                  : `<div class="account__datum">
+                <label><abbr title="\`get_account_unstaked_balance\` from the staking pool (${delegated_to})">Staking Pool Unstaked Balance</abbr></label>
+                ${window.utils.formatLargeNum(unstaked_balance)}
               </div>`
               }
               ${
