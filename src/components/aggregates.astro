@@ -17,12 +17,20 @@
       oldAccounts = accounts;
 
       const totals = {
-        "Total Locked": 0,
+        Locked: 0,
+        Claimable: 0,
+        "On-hand": 0,
+        Staked: 0,
+        Unstaked: 0,
         "Grand Total": 0,
       };
 
       accounts.forEach((account) => {
-        totals["Total Locked"] += account.lockup_info["Locked Amount"];
+        totals["Locked"] += account.lockup_info["Locked Amount"];
+        totals["Claimable"] += account.lockup_info["Owner's Balance"];
+        totals["On-hand"] += toNear(account.native_balance);
+        totals["Staked"] += toNear(account.staked_balance);
+        totals["Unstaked"] += toNear(account.unstaked_balance);
         totals["Grand Total"] +=
           toNear(account.native_balance) +
           account.lockup_info["Owner's Balance"] +
@@ -31,12 +39,10 @@
           toNear(account.unstaked_balance);
       });
 
-      container.innerHTML = `<p style="text-align: center">${Object.entries(
-        totals,
-      )
+      container.innerHTML = `<p>${Object.entries(totals)
         .map(
           ([label, value]) =>
-            `${label}: ${window.utils.formatLargeNum(value, { convertYocto: false })}<br>`,
+            `${label}: <span style="float: right">${window.utils.formatLargeNum(value, { convertYocto: false })}</span><br>`,
         )
         .join("")}</p>`;
     });
