@@ -559,11 +559,9 @@
                 <span>${displayValidatorStatus(
                   validator_status,
                   native_balance +
-                    (staked_balance && lockup_balance
-                      ? staked_balance + unstaked_balance - lockup_balance
-                      : staked_balance
-                        ? staked_balance + unstaked_balance
-                        : lockup_balance),
+                    (isNaN(staked_balance) ? 0 : staked_balance) +
+                    (isNaN(unstaked_balance) ? 0 : unstaked_balance) +
+                    (isNaN(lockup_balance) ? 0 : lockup_balance),
                 )}</span>
               </div>
             </div>
