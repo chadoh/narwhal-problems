@@ -647,36 +647,36 @@
               </div>`
               }
               ${
-                !delegated_to
+                !lockup_contract || lockup_contract === "DELETED"
                   ? ""
                   : `<div class="account__datum">
-                <label><abbr title="Staking Pool Balance minus Lockup Balance">Unclaimed Earnings</abbr></label>
-                ${window.utils.formatLargeNum(staked_balance - lockup_balance)}
-              </div>`
+                    <label><abbr title="Staking Pool Balance minus Lockup Balance">Unclaimed Earnings</abbr></label>
+                      ${window.utils.formatLargeNum(staked_balance - lockup_balance)}
+                    </div>` +
+                    Object.entries(lockup_info)
+                      .map(
+                        ([key, value]) => `<div class="account__datum">
+                          <label>${key}</label>
+                          <pre>${JSON.stringify(value)}</pre>
+                        </div>`,
+                      )
+                      .join("")
               }
-              ${Object.entries(lockup_info)
-                .map(
-                  ([key, value]) => `<div class="account__datum">
-                <label>${key}</label>
-                <pre>${JSON.stringify(value)}</pre>
-              </div>`,
-                )
-                .join("")}
               ${Object.entries(extra)
                 .map(
                   ([key, value]) => `<div class="account__datum">
-                <label>${key}</label>
-                <div class="ellipsis" title="${value}">${value}</div>
-              </div>`,
+                  <label>${key}</label>
+                  <div class="ellipsis" title="${value}">${value}</div>
+                  </div>`,
                 )
                 .join("")}
-            </div>
-            <button class="full-width button-size--small" data-behavior="openAccountDetails">
-              <span>details</span>
-            </button>
-          </footer>
-        </div>
-      `,
+              </div>
+              <button class="full-width button-size--small" data-behavior="openAccountDetails">
+                <span>details</span>
+              </button>
+            </footer>
+          </div>
+        `,
       ),
     );
 
