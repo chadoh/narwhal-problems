@@ -538,6 +538,7 @@
           lockup_balance,
           staked_balance,
           unstaked_balance,
+          can_withdraw,
           lockup_contract,
           delegated_to, // possibly undefined
           validator_status, // possibly undefined
@@ -633,18 +634,20 @@
               ${
                 !delegated_to
                   ? ""
-                  : `<div class="account__datum">
-                <label><abbr title="\`get_account_staked_balance\` from the staking pool (${delegated_to})">Staking Pool Staked Balance</abbr></label>
-                ${window.utils.formatLargeNum(staked_balance)}
-              </div>`
-              }
-              ${
-                !delegated_to
-                  ? ""
-                  : `<div class="account__datum">
-                <label><abbr title="\`get_account_unstaked_balance\` from the staking pool (${delegated_to})">Staking Pool Unstaked Balance</abbr></label>
-                ${window.utils.formatLargeNum(unstaked_balance)}
-              </div>`
+                  : `
+                  <div class="account__datum">
+                    <label><abbr title="\`${delegated_to}.get_account(…).staked_balance\`">Staked Balance</abbr></label>
+                    ${window.utils.formatLargeNum(staked_balance)}
+                  </div>
+                  <div class="account__datum">
+                    <label><abbr title="\`${delegated_to}.get_account(…).unstaked_balance\`">Unstaked Balance</abbr></label>
+                    ${window.utils.formatLargeNum(unstaked_balance)}
+                  </div>
+                  <div class="account__datum">
+                    <label><abbr title="\`${delegated_to}.get_account(…).can_withdraw\`">Can withdraw?</abbr></label>
+                    ${can_withdraw}
+                  </div>
+                `
               }
               ${
                 !lockup_contract || lockup_contract === "DELETED"

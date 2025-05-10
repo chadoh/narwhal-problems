@@ -26,6 +26,7 @@ export type Account = RawAccount & {
   lockup_balance: number;
   staked_balance: number;
   unstaked_balance: number;
+  can_withdraw: boolean;
   validator_status?: ValidatorStatus;
   native_balance: number;
 };
@@ -127,30 +128,20 @@ async function updateAccountsCache(): Promise<void> {
           ...(!account.delegated_to ? {
             staked_balance: 0,
             unstaked_balance: 0,
-          } : {
-              staked_balance: Number(
-                await view(
-                  account.delegated_to,
-                  "get_account_staked_balance",
-                  {
-                    account_id: account.lockup_contract !== "DELETED"
-                    ? account.lockup_contract
-                    : account.account_name,
-                  },
-                ),
-              ),
-              unstaked_balance: Number(
-                await view(
-                  account.delegated_to,
-                  "get_account_unstaked_balance",
-                  {
-                    account_id: account.lockup_contract !== "DELETED"
-                    ? account.lockup_contract
-                    : account.account_name,
-                  },
-                ),
-              ),
-            }),
+            can_withdraw: false,
+          } : Object.fromEntries(Object.entries(await view(
+              account.delegated_to,
+              "get_account",
+              {
+                account_id: account.lockup_contract !== "DELETED"
+                ? account.lockup_contract
+                : account.account_name,
+              },
+            )).map(([k, v]) => [
+              k,
+              ['staked_balance', 'unstaked_balance'].includes(k) ? Number(v) : v
+            ]))
+          ),
         };
       },
     ),
